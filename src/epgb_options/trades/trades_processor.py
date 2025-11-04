@@ -50,6 +50,13 @@ class TradesProcessor:
             if 'LastPx' in df.columns:
                 df['LastPx'] = pd.to_numeric(df['LastPx'], errors='coerce')
             
+            # CRITICAL: Ensure index columns are strings for consistent comparison
+            # This prevents type mismatches during merge operations
+            index_cols = ['ExecutionID', 'OrderID', 'Account']
+            for col in index_cols:
+                if col in df.columns:
+                    df[col] = df[col].astype(str)
+            
             # Sort by timestamp (handle out-of-order events)
             df.sort_values('TimestampUTC', inplace=True)
             
@@ -62,10 +69,22 @@ class TradesProcessor:
                 logger.error(f"Missing required columns: {missing_cols}")
                 return pd.DataFrame()
             
+            # Check for duplicates BEFORE setting index
+            duplicates_mask = df.duplicated(subset=['ExecutionID', 'OrderID', 'Account'], keep=False)
+            if duplicates_mask.any():
+                num_duplicates = duplicates_mask.sum()
+                logger.warning(f"Found {num_duplicates} duplicate executions from broker - keeping latest by timestamp")
+                # Keep the latest execution by timestamp for each ExecutionID+OrderID+Account
+                df = df.sort_values('TimestampUTC').drop_duplicates(
+                    subset=['ExecutionID', 'OrderID', 'Account'], 
+                    keep='last'  # Keep the most recent
+                )
+                logger.info(f"After deduplication: {len(df)} unique executions")
+            
             # Set composite index
             df.set_index(['ExecutionID', 'OrderID', 'Account'], inplace=True)
             
-            logger.info(f"Processed {len(df)} executions")
+            logger.debug(f"Processed {len(df)} executions")
             return df
             
         except Exception as e:

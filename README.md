@@ -35,7 +35,7 @@ python -m venv .venv
 .venv\Scripts\activate
 
 # Instalar el paquete en modo editable
-pip install -e .
+pip install -e . --force-reinstall --no-deps
 ```
 
 #### Opción 2: Instalación manual
@@ -101,6 +101,79 @@ Para deshabilitar completamente la sincronización de trades, configurá: `TRADE
 python tools/create_configs.py
 ```
 
+### Configuración de Instrumentos en Excel
+
+La hoja `Tickers` del archivo **EPGB OC-DI - Python.xlsb** define qué instrumentos se van a suscribir. Cada tipo de instrumento tiene una columna fija.
+
+| Tipo | Columna | Rango usado | Ejemplo en celda | Transformación hacia pyRofex |
+|------|---------|-------------|------------------|-------------------------------|
+| Opciones | A | A2:A500 | GFGC32781O | Se agrega prefijo `MERV - XMEV -` y sufijo ` - 24hs` (ya incluido si figura en la plantilla) |
+| Acciones | C | C2:C500 | GGAL - 24hs / GGAL - spot | Prefijo + sufijo (24hs o spot). Spot se detecta al tener literal `spot` en el nombre |
+| Bonos | E | E2:E500 | AL30 - 24hs / AL30D - spot | Prefijo + sufijo; sufijo ` - 24hs` o ` - spot` según la celda |
+| CEDEARs | G | G2:G500 | AAPL - 24hs | Prefijo + sufijo |
+| Letras | I | I2:I500 | S30S5 - 24hs | Prefijo + sufijo |
+| ONs | K | K2:K500 | TLC1O - 24hs | Prefijo + sufijo |
+| Panel General | M | M2:M500 | HAVA - 24hs | Prefijo + sufijo |
+| Futuros | O | O2:O500 | DLR/NOV25 | SIN prefijo ni sufijo (detectado por `/`) |
+
+> Los símbolos se transforman mediante la función interna `transform_symbol_for_pyrofex`. Si el símbolo contiene `/` (caso futuros como `DLR/NOV25`) no se aplica el prefijo `MERV - XMEV -` ni el sufijo ` - 24hs`.
+
+#### Opciones
+- Deben colocarse en la columna A.
+- Formato típico: Código raíz + cadena de vencimiento + `O` (ej: `GFGC32781O`).
+- La aplicación genera un DataFrame con columnas: `bid`, `ask`, `bidsize`, `asksize`, `last`, `change`, `open`, `high`, `low`, `previous_close`, `turnover`, `volume`, `operations`, `datetime`.
+
+#### Spot vs 24hs
+Para acciones/bonos/etc. se distinguen dos variantes:
+- `AL30 - 24hs` (24 horas)
+- `AL30 - spot` (contado inmediato)
+
+Ambas variantes pueden convivir. El sufijo exacto determina la transformación y suscripción.
+
+#### Futuros
+- Se ingresan en la columna O sin sufijos: `DLR/NOV25`, `DLR/DIC25`, `DLR/ENE26`.
+- La detección de futuro es por el caracter `/`.
+- No se agrega prefijo ni sufijo para asegurar compatibilidad con la API.
+
+#### Cauciones (Repos)
+No se configuran manualmente en el Excel: se generan automáticamente de 1D a 32D bajo el formato:
+```
+MERV - XMEV - PESOS - 1D
+...
+MERV - XMEV - PESOS - 32D
+```
+Se muestran en la tabla derecha de la hoja `Prices`.
+
+#### Validación de Instrumentos
+Al iniciar, la app:
+1. Lee cada columna y filtra celdas vacías.
+2. Aplica transformación de símbolos.
+3. Consulta el caché de instrumentos de pyRofex.
+4. Remueve los símbolos inválidos (log: `⚠️  Total: X símbolos inválidos removidos`).
+5. Muestra resumen por tipo (ej: `Opciones: 52/60 válidas`).
+
+#### Ejemplo Visual
+Hoja `Tickers` (configuración de símbolos):
+![Tickers Sheet](docs/images/excel-instrument-config.png "Columnas de configuración de instrumentos")
+
+Hoja `Prices` (datos de mercado y cauciones):
+![Prices Sheet](docs/images/excel-marketdata.png "Datos de mercado en vivo")
+
+Logs de inicio y validación:
+![Startup Logs](docs/images/console-start.png "Proceso de carga y validación")
+![Marketdata Logs](docs/images/console-update.png "Proceso de actualizacion de datos de mercado")
+
+
+### Optimización de Actualizaciones de Excel
+
+La aplicación evita escribir en Excel cuando no hay datos nuevos de mercado:
+- Primera iteración: siempre actualiza (`📊 Primera actualización de Excel - inicializando`).
+- Ciclos siguientes: compara `last_market_data_time` vs `last_excel_update_time`.
+- Si no hubo nuevos mensajes: `⏭️  Sin nuevos datos de mercado ... - omitiendo Excel`.
+- Cada 10 ciclos: `📊 Optimización Excel - Ciclo N: X actualizaciones, Y omitidas (Z% ahorrado)`.
+
+Esto reduce la carga cuando el mercado está cerrado o en períodos de baja actividad.
+
 ### Ejecutar la aplicación
 
 ```bash
@@ -160,7 +233,7 @@ EPGB_pyRofex/
 
 ```bash
 # Reinstalá el paquete
-pip install -e .
+pip install -e . --force-reinstall --no-deps
 ```
 
 2) Problemas de conexión con Excel

@@ -327,7 +327,7 @@ if all_tests_passed:
     print("✅ System is ready for live operation")
     exit_code = 0
 else:
-    print("⚠️  SOME TESTS FAILED")
+    print("SOME TESTS FAILED")
     print("🔧 Please address failed tests before proceeding")
     exit_code = 1
 
