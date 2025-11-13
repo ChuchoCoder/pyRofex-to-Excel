@@ -23,8 +23,6 @@ EPGB_pyRofex te permite:
 
 ### Instalación
 
-#### Opción 1: Instalación moderna (recomendada)
-
 ```bash
 # Clonar el repositorio
 git clone https://github.com/ChuchoCoder/EPGB_pyRofex.git
@@ -37,20 +35,6 @@ python -m venv .venv
 # Instalar el paquete en modo editable
 pip install -e . --force-reinstall --no-deps
 ```
-
-#### Opción 2: Instalación manual
-
-```bash
-# Crear entorno virtual
-python -m venv .venv
-
-# Activar entorno virtual (Windows)
-.venv\Scripts\activate
-
-# Instalar dependencias
-pip install -r requirements.txt
-```
-
 ### Configuración
 
 1. Copiá la plantilla y creá el archivo de configuración:

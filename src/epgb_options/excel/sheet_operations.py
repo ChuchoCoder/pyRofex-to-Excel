@@ -43,6 +43,9 @@ class SheetOperations:
         
         # Progress logger para actualizaciones masivas
         self._progress_logger = ProgressLogger(throttle_seconds=0.5)
+        
+        # Display symbol cache for performance optimization
+        self._display_symbol_cache = {}
     
     def set_instrument_cache(self, instrument_cache):
         """
@@ -195,6 +198,11 @@ class SheetOperations:
                 self._symbol_row_cache = {}
                 duplicate_rows = []  # Track rows with duplicate symbols
                 
+                # OPTIMIZATION: Pre-build options set for fast lookups during cache building
+                options_symbols_set = set()
+                if self.instrument_cache and self.instrument_cache._options_symbols:
+                    options_symbols_set = self.instrument_cache._options_symbols
+                
                 for idx, cell_value in enumerate(symbols):
                     if cell_value and str(cell_value).strip():
                         # Row index is idx + 2 (skip header at row 1, and enumerate starts at 0)
@@ -211,7 +219,16 @@ class SheetOperations:
                         # If no suffix present and not a caucion (PESOS - XD), add " - 24hs"
                         # This handles options that had their suffix stripped for display
                         if not has_suffix and "PESOS" not in full_symbol:
-                            full_symbol = f"{full_symbol} - 24hs"
+                            # OPTIMIZATION: Check if symbol (with suffix) exists in options set
+                            # The options_symbols_set contains full symbols WITH suffix, so we need to check
+                            # if adding the suffix would match an option
+                            full_symbol_with_suffix = f"{full_symbol} - 24hs"
+                            is_option = full_symbol_with_suffix in options_symbols_set
+                            
+                            # Add suffix for all MERV securities (stocks, bonds, options, etc.)
+                            # This maintains consistency with market data updates
+                            if is_option or not any(x in full_symbol for x in ['/', 'I.']):
+                                full_symbol = full_symbol_with_suffix
                         
                         # Check for duplicates
                         if full_symbol in self._symbol_row_cache:
@@ -238,6 +255,9 @@ class SheetOperations:
                 )
                 self._add_symbols_to_sheet(prices_sheet, missing_symbols)
                 logger.debug(f"Agregados {len(missing_symbols)} símbolos nuevos a Excel")
+                
+                # NOTE: Cache is updated in _add_symbols_to_sheet, so newly added symbols
+                # are immediately available for lookups below. No cache rebuild needed.
             
             # BULK UPDATE: Build 2D array for all data at once
             # Columns: B=bid_size, C=bid, D=ask, E=ask_size, F=last, G=change, H=open, I=high, J=low, K=previous_close, L=turnover, M=volume, N=operations, O=datetime
@@ -386,15 +406,34 @@ class SheetOperations:
             # Add symbols starting from the next available row
             start_row = last_row + 1
             
+            # OPTIMIZATION: Pre-compute option status for ALL symbols in a single batch operation
+            # This avoids expensive individual lookups during the loop (fixes 1-2s delay/flicker)
+            options_status = {}
+            if self.instrument_cache and self.instrument_cache._options_symbols:
+                # Use fast O(1) set lookup for all symbols at once
+                options_symbols_set = self.instrument_cache._options_symbols
+                options_status = {sym: (sym in options_symbols_set) for sym in symbols}
+                logger.debug(f"Pre-computed option status for {len(symbols)} symbols ({sum(options_status.values())} options)")
+            
+            # Check for duplicates BEFORE adding (prevent duplicates during runtime)
+            symbols_to_add = []
+            for symbol in symbols:
+                if symbol not in self._symbol_row_cache:
+                    symbols_to_add.append(symbol)
+                else:
+                    logger.warning(f"⚠️ Símbolo {symbol} ya existe en fila {self._symbol_row_cache[symbol]}, omitiendo duplicado")
+            
+            if not symbols_to_add:
+                logger.debug("Todos los símbolos ya existen, no se agrega nada")
+                return
+            
             # Prepare bulk data for faster writing
             symbol_data = []
-            for i, symbol in enumerate(symbols):
+            for i, symbol in enumerate(symbols_to_add):
                 row_num = start_row + i
                 
-                # Check if symbol is an option (for proper display formatting)
-                is_option = False
-                if self.instrument_cache:
-                    is_option = self.instrument_cache.is_option_symbol(symbol)
+                # Get pre-computed option status (O(1) dict lookup instead of expensive cache search)
+                is_option = options_status.get(symbol, False)
                 
                 # Clean symbol for display (remove "MERV - XMEV - " prefix, and " - 24hs" for options)
                 display_symbol = clean_symbol_for_display(symbol, is_option=is_option)
@@ -407,10 +446,12 @@ class SheetOperations:
                 self._symbol_row_cache[symbol] = row_num
             
             # Bulk write all symbols at once (much faster than individual writes)
-            end_row = start_row + len(symbols) - 1
-            sheet.range(f'A{start_row}:O{end_row}').value = symbol_data
-            
-            logger.debug(f"Agregados {len(symbols)} símbolos a la hoja comenzando en fila {start_row}")
+            if symbol_data:
+                end_row = start_row + len(symbols_to_add) - 1
+                sheet.range(f'A{start_row}:O{end_row}').value = symbol_data
+                logger.debug(f"Agregados {len(symbols_to_add)} símbolos a la hoja comenzando en fila {start_row}")
+            else:
+                logger.debug("No hay símbolos para agregar después del filtrado de duplicados")
             
         except Exception as e:
             logger.error(f"Error al agregar símbolos a la hoja: {e}")
@@ -730,6 +771,82 @@ class SheetOperations:
             'errors': 0,
             'last_update_time': None
         }
+    
+    def cleanup_duplicate_symbols(self, sheet_name: str) -> int:
+        """
+        Limpia símbolos duplicados de una hoja de Excel.
+        
+        Escanea la columna A buscando símbolos duplicados y elimina las filas extras,
+        manteniendo solo la primera ocurrencia de cada símbolo.
+        
+        Args:
+            sheet_name: Nombre de la hoja a limpiar
+            
+        Returns:
+            int: Número de filas duplicadas eliminadas
+        """
+        try:
+            sheet = self.workbook.sheets(sheet_name)
+            
+            # Read all symbols from column A
+            symbols_range = sheet.range('A2:A1000')
+            symbols = symbols_range.value
+            
+            # Handle single value case
+            if not isinstance(symbols, list):
+                symbols = [symbols] if symbols else []
+            
+            # Track seen symbols and duplicate rows
+            seen_symbols = set()
+            duplicate_rows = []
+            
+            # OPTIMIZATION: Pre-build options set for proper symbol reconstruction
+            options_symbols_set = set()
+            if self.instrument_cache and self.instrument_cache._options_symbols:
+                options_symbols_set = self.instrument_cache._options_symbols
+            
+            for idx, cell_value in enumerate(symbols):
+                if cell_value and str(cell_value).strip():
+                    display_symbol = str(cell_value).strip()
+                    
+                    # Restore full symbol with prefix
+                    full_symbol = restore_symbol_prefix(display_symbol)
+                    
+                    # Add suffix if needed (same logic as cache building)
+                    has_suffix = any(full_symbol.endswith(suffix) for suffix in 
+                                   [" - 24hs", " - 48hs", " - 72hs", " - CI", " - T0", " - T1", " - T2"])
+                    
+                    if not has_suffix and "PESOS" not in full_symbol:
+                        full_symbol_with_suffix = f"{full_symbol} - 24hs"
+                        is_option = full_symbol_with_suffix in options_symbols_set
+                        
+                        if is_option or not any(x in full_symbol for x in ['/', 'I.']):
+                            full_symbol = full_symbol_with_suffix
+                    
+                    # Check if duplicate
+                    if full_symbol in seen_symbols:
+                        duplicate_rows.append(idx + 2)  # +2 for header and 0-based index
+                    else:
+                        seen_symbols.add(full_symbol)
+            
+            # Remove duplicates if found
+            if duplicate_rows:
+                logger.info(f"🧹 Limpiando {len(duplicate_rows)} filas duplicadas de {sheet_name}...")
+                self._remove_duplicate_rows(sheet, duplicate_rows)
+                logger.info(f"✅ Eliminadas {len(duplicate_rows)} filas duplicadas")
+                
+                # Invalidate cache to force rebuild on next update
+                if hasattr(self, '_symbol_row_cache'):
+                    delattr(self, '_symbol_row_cache')
+                
+                return len(duplicate_rows)
+            else:
+                logger.info(f"✓ No se encontraron duplicados en {sheet_name}")
+                return 0
+                
+        except Exception as e:
+            logger.error(f"Error al limpiar duplicados: {e}")
+            return 0
     
     def finish_progress(self):
         """

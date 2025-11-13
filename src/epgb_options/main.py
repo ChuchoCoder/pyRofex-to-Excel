@@ -645,25 +645,33 @@ class EPGBOptionsApp:
         try:
             logger.debug("Actualizando Excel con datos actuales...")
             
-            # Actualizar hoja Prices con datos de valores (excluyendo cauciones)
-            if not self.everything_df.empty:
-                success = self.sheet_operations.update_market_data_to_prices_sheet(
-                    self.everything_df, EXCEL_SHEET_PRICES, self.cauciones_df
-                )
-                if not success:
-                    logger.warning("Fallo al actualizar hoja Prices")
+            # OPTIMIZATION: Combine options and securities into single DataFrame to avoid flicker
+            # Previously, options were updated separately causing a brief blank period
+            combined_df = pd.DataFrame()
             
-            # Actualizar opciones en Prices sheet
+            # Add securities data (if available)
+            if not self.everything_df.empty:
+                combined_df = self.everything_df.copy()
+            
+            # Add options data with column name conversion (if available)
             if not self.options_df.empty:
                 # Opciones usan bidsize/asksize sin underscore, necesitamos renombrar para compatibilidad con Excel
                 options_for_excel = self.options_df.copy()
                 options_for_excel = options_for_excel.rename(columns={'bidsize': 'bid_size', 'asksize': 'ask_size'})
                 
+                # Combine with securities (no index overlap, so safe to concat)
+                if combined_df.empty:
+                    combined_df = options_for_excel
+                else:
+                    combined_df = pd.concat([combined_df, options_for_excel], ignore_index=False)
+            
+            # Single bulk update to Excel (eliminates flicker from separate updates)
+            if not combined_df.empty:
                 success = self.sheet_operations.update_market_data_to_prices_sheet(
-                    options_for_excel, EXCEL_SHEET_PRICES, cauciones_df=None
+                    combined_df, EXCEL_SHEET_PRICES, self.cauciones_df
                 )
                 if not success:
-                    logger.warning("Fallo al actualizar opciones en Prices")
+                    logger.warning("Fallo al actualizar hoja Prices")
             
             logger.debug("Actualización de Excel completada")
             return True
