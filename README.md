@@ -33,7 +33,7 @@ python -m venv .venv
 .venv\Scripts\activate
 
 # Instalar el paquete en modo editable
-pip install -e . --force-reinstall --no-deps
+pip install -e . --force-reinstall
 ```
 ### Configuración
 
