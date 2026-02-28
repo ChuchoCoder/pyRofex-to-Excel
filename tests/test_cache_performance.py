@@ -11,7 +11,7 @@ from pathlib import Path
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'src'))
 
-from epgb_options.market_data.instrument_cache import InstrumentCache
+from pyRofex_To_Excel.market_data.instrument_cache import InstrumentCache
 
 
 def test_cache_performance():

@@ -10,7 +10,7 @@
 ## 🏗️ Proposed Structure
 
 ```
-EPGB_pyRofex/
+pyRofex_To_Excel/
 ├── pyproject.toml              # Modern project configuration
 ├── README.md                   # Project documentation
 ├── setup.py                   # Legacy setup script (optional)
@@ -18,7 +18,7 @@ EPGB_pyRofex/
 ├── setup.ps1                  # Windows setup script
 │
 ├── src/                       # Source code package (NEW)
-│   └── epgb_options/          # Main application package
+│   └── pyRofex_To_Excel/      # Main application package
 │       ├── __init__.py        # Package init
 │       ├── main.py            # Application entry point (simplified)
 │       │
@@ -76,7 +76,7 @@ EPGB_pyRofex/
 - **utils/**: Reusable utilities
 
 ### 2. **Proper Package Structure**
-- **src/epgb_options/**: Main installable package
+- **src/pyRofex_To_Excel/**: Main installable package
 - **tests/**: Dedicated test suite
 - **tools/**: Development utilities
 - **data/**: Data files separated from code

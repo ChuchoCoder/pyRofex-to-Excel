@@ -1,7 +1,7 @@
 # pyRofex-To-Excel
 
-[![CI](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/ci.yml)
-[![Package Release](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/package-release.yml/badge.svg)](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/package-release.yml)
+[![CI](https://github.com/ChuchoCoder/pyRofex_To_Excel/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuchoCoder/pyRofex_To_Excel/actions/workflows/ci.yml)
+[![Package Release](https://github.com/ChuchoCoder/pyRofex_To_Excel/actions/workflows/package-release.yml/badge.svg)](https://github.com/ChuchoCoder/pyRofex_To_Excel/actions/workflows/package-release.yml)
 
 Aplicación Python para obtener datos de mercado en tiempo real desde pyRofex y volcarlos a Excel.
 
@@ -16,8 +16,8 @@ Si acabás de clonar el repositorio y no tenés nada configurado, seguí exactam
 2. Clonar e instalar
 
 ```bash
-git clone https://github.com/ChuchoCoder/EPGB_pyRofex.git
-cd EPGB_pyRofex
+git clone https://github.com/ChuchoCoder/pyRofex_To_Excel.git
+cd pyRofex_To_Excel
 python -m venv .venv
 .venv\Scripts\activate
 pip install -e . --force-reinstall
@@ -26,7 +26,7 @@ pip install -e . --force-reinstall
 3. Ejecutar por primera vez
 
 ```bash
-python -m epgb_options
+python -m pyRofex_To_Excel
 ```
 
 Qué pasa automáticamente en ese primer arranque:
@@ -145,3 +145,4 @@ Solo falta ejecutar el flujo de build + publicación (ver guía en [docs/PUBLICA
 - Nunca subas `.env` con credenciales reales.
 - Rotá credenciales periódicamente.
 - Revisá permisos de archivos sensibles en tu entorno local.
+

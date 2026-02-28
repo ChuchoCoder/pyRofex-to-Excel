@@ -8,7 +8,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
-from epgb_options.utils.helpers import clean_symbol_for_display
+from pyRofex_To_Excel.utils.helpers import clean_symbol_for_display
 
 
 def test_symbol_display_formatting():

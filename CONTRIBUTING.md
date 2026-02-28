@@ -17,8 +17,8 @@ Thank you for your interest in contributing to this project! This guide covers d
 
 ```bash
 # Clone the repository
-git clone https://github.com/ChuchoCoder/EPGB_pyRofex.git
-cd EPGB_pyRofex
+git clone https://github.com/ChuchoCoder/pyRofex_To_Excel.git
+cd pyRofex_To_Excel
 
 # Create & activate a virtual environment (Windows)
 python -m venv .venv
@@ -80,7 +80,7 @@ This project uses modern Python dependency management via `pyproject.toml`:
 pip install -e ".[dev]"   # Install dev dependencies
 ruff check .               # Lint
 ruff format .              # Auto-format
-mypy src/epgb_options      # Type check
+mypy src/pyRofex_To_Excel      # Type check
 pytest                     # (When tests added)
 ```
 
@@ -91,7 +91,7 @@ pytest                     # (When tests added)
 .venv\Scripts\activate
 ruff check .
 ruff format .
-mypy src/epgb_options
+mypy src/pyRofex_To_Excel
 ```
 
 ### Using Make (Unix/Linux/Mac)
@@ -107,12 +107,12 @@ make quality                # Run all quality checks
 ## 📁 Project Structure
 
 ```text
-EPGB_pyRofex/
+pyRofex_To_Excel/
 ├── pyproject.toml          # Modern project configuration
 ├── setup.ps1              # PowerShell helper commands
 ├── Makefile               # Unix command shortcuts
 │
-├── src/epgb_options/      # Main application package
+├── src/pyRofex_To_Excel/      # Main application package
 │   ├── __init__.py
 │   ├── main.py           # Application entry point
 │   ├── config/           # Configuration modules
@@ -188,7 +188,7 @@ The project includes pre-configured debug configurations in `.vscode/launch.json
 
 **Tips:**
 
-- Set breakpoints in `src/epgb_options/main.py` initialization
+- Set breakpoints in `src/pyRofex_To_Excel/main.py` initialization
 - Check `api_client.py` for API connection issues
 - Monitor `websocket_handler.py` for real-time data flow
 - Use conditional breakpoints (right-click breakpoint) for specific scenarios
@@ -198,8 +198,8 @@ The project includes pre-configured debug configurations in `.vscode/launch.json
 The application uses a modern configuration system:
 
 1. **Configuration Modules (generated / maintained):**
-   - `src/epgb_options/config/excel_config.py`
-   - `src/epgb_options/config/pyrofex_config.py`
+   - `src/pyRofex_To_Excel/config/excel_config.py`
+   - `src/pyRofex_To_Excel/config/pyrofex_config.py`
 
 2. **Environment Variables:**
    - `.env` file in project root for local development
@@ -245,7 +245,7 @@ python tools/create_configs.py
 # 5. Run quality checks
 ruff check .
 ruff format .
-mypy src/epgb_options
+mypy src/pyRofex_To_Excel
 
 # 6. Test your changes
 pyrofex-to-excel
@@ -342,7 +342,7 @@ This will automatically run:
    ```bash
    ruff check .
    ruff format .
-   mypy src/epgb_options
+   mypy src/pyRofex_To_Excel
    ```
 
 5. **Test your changes:**
@@ -391,7 +391,8 @@ This project is licensed under the MIT License.
 For development issues:
 
 - Run `python tools/validate_system.py` to validate setup
-- Review `src/epgb_options/config/` modules
+- Review `src/pyRofex_To_Excel/config/` modules
 - Ensure `.env` is present with populated credentials
 - Confirm virtual environment is active
 - Check the `docs/` folder for architecture documentation
+

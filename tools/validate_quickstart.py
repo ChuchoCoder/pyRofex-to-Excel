@@ -285,8 +285,8 @@ for invalid_data, description in invalid_data_tests:
 # Step 7: Excel Module Integration Test
 print("\n🔍 Step 7: Excel Module Integration Test")
 try:
-    from src.epgb_options.excel.symbol_loader import SymbolLoader
-    from src.epgb_options.excel.workbook_manager import WorkbookManager
+    from src.pyRofex_To_Excel.excel.symbol_loader import SymbolLoader
+    from src.pyRofex_To_Excel.excel.workbook_manager import WorkbookManager
 
     # Check key classes exist and have required methods
     assert hasattr(WorkbookManager, 'connect'), "WorkbookManager missing connect"
@@ -303,8 +303,8 @@ except Exception as e:
 # Step 8: Market Data Module Integration Test
 print("\n🔍 Step 8: Market Data Module Integration Test")
 try:
-    from src.epgb_options.market_data.api_client import pyRofexClient
-    from src.epgb_options.market_data.websocket_handler import WebSocketHandler
+    from src.pyRofex_To_Excel.market_data.api_client import pyRofexClient
+    from src.pyRofex_To_Excel.market_data.websocket_handler import WebSocketHandler
 
     # Check key classes exist and have required methods
     assert hasattr(pyRofexClient, 'initialize'), "pyRofexClient missing initialize"

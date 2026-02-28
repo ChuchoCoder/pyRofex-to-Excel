@@ -66,7 +66,7 @@ Secrets esperados por el workflow de release:
 - [ ] Incrementar versión en `pyproject.toml`
 - [ ] Verificar README renderiza bien en PyPI (`twine check`)
 - [ ] Probar instalación limpia en venv nuevo
-- [ ] Confirmar comandos `pyrofex-to-excel` y `python -m epgb_options` funcionan
+- [ ] Confirmar comandos `pyrofex-to-excel` y `python -m pyRofex_To_Excel` funcionan
 - [ ] Confirmar dependencias nativas (Excel/xlwings) documentadas para usuarios Windows
 
 ## Limitación importante

@@ -8,7 +8,7 @@ version = "1.1.1"
 description = "pyRofex-To-Excel - Real-time market data to Excel"
 readme = "README.md"
 authors = [
-    {name = "pyRofex-To-Excel", email = "developer@epgb.com"}
+    {name = "pyRofex-To-Excel", email = "developer@pyrofex-to-excel.dev"}
 ]
 requires-python = ">=3.9"
 
@@ -30,7 +30,7 @@ dev = [
 
 # Entry points for command-line scripts
 [project.scripts]
-pyrofex-to-excel = "epgb_options.main:main"
+pyrofex-to-excel = "pyRofex_To_Excel.main:main"
 
 # Setuptools configuration
 [tool.setuptools.packages.find]

@@ -108,7 +108,7 @@ switch ($Command) {
     
     "run" {
         Write-Host "🚀 Running pyRofex-To-Excel..." -ForegroundColor Blue
-        Invoke-Command-Safe "python -m epgb_options" "Running application"
+        Invoke-Command-Safe "python -m pyRofex_To_Excel" "Running application"
     }
     
     "config" {

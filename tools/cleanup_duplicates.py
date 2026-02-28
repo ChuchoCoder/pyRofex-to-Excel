@@ -1,7 +1,7 @@
 """
 Script para limpiar símbolos duplicados en la hoja de Excel.
 
-Este script se conecta al archivo Excel EPGB-ChuchoTrader.xlsb y elimina
+Este script se conecta al archivo Excel de pyRofex-To-Excel y elimina
 cualquier fila duplicada en la hoja Prices.
 
 Uso:
@@ -15,10 +15,10 @@ from pathlib import Path
 src_path = Path(__file__).resolve().parents[1] / 'src'
 sys.path.insert(0, str(src_path))
 
-from epgb_options.config import EXCEL_FILE, EXCEL_PATH, EXCEL_SHEET_PRICES
-from epgb_options.excel import SheetOperations, WorkbookManager
-from epgb_options.market_data import pyRofexClient
-from epgb_options.utils import get_logger, setup_logging
+from pyRofex_To_Excel.config import EXCEL_FILE, EXCEL_PATH, EXCEL_SHEET_PRICES
+from pyRofex_To_Excel.excel import SheetOperations, WorkbookManager
+from pyRofex_To_Excel.market_data import pyRofexClient
+from pyRofex_To_Excel.utils import get_logger, setup_logging
 
 logger = get_logger(__name__)
 
