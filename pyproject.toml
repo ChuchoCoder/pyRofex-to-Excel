@@ -35,3 +35,8 @@ pyrofex-to-excel = "pyRofex_To_Excel.main:main"
 # Setuptools configuration
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+markers = [
+    "performance: performance-sensitive tests that may be excluded from fast CI lanes",
+]
