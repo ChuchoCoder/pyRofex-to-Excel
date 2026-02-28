@@ -54,7 +54,7 @@ EPGB_pyRofex/
 │   └── validate_quickstart.py # Quickstart validation
 │
 ├── data/                      # Data files (NEW)
-│   ├── EPGB OC-DI - Python.xlsb # Excel workbook
+│   ├── pyRofex-Market-Data.xlsb # Excel workbook
 │   └── .env.example           # Environment template
 │
 ├── tests/                     # Test suite (NEW)

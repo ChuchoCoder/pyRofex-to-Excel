@@ -12,11 +12,11 @@ function Show-Help {
     Write-Host "=============================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Setup Commands:" -ForegroundColor Yellow
-    Write-Host "  .\setup.ps1 install     - Install production dependencies"
-    Write-Host "  .\setup.ps1 install-dev - Install development dependencies" 
-    Write-Host "  .\setup.ps1 check       - Check current environment"
-    Write-Host "  .\setup.ps1 upgrade     - Upgrade all dependencies"
-    Write-Host "  .\setup.ps1 clean       - Clean virtual environment"
+    Write-Host "  .\setup.ps1 install     - Install package (editable) via pip"
+    Write-Host "  .\setup.ps1 install-dev - Install package + dev deps"
+    Write-Host "  .\setup.ps1 check       - Validate environment"
+    Write-Host "  .\setup.ps1 upgrade     - Upgrade dependencies from requirements files"
+    Write-Host "  .\setup.ps1 clean       - Remove .venv virtual environment"
     Write-Host ""
     Write-Host "Development Commands:" -ForegroundColor Yellow
     Write-Host "  .\setup.ps1 lint        - Run linting (ruff)"
@@ -25,7 +25,7 @@ function Show-Help {
     Write-Host "  .\setup.ps1 run         - Run the main application"
     Write-Host ""
     Write-Host "Utility Commands:" -ForegroundColor Yellow
-    Write-Host "  .\setup.ps1 config      - Run configuration migration"
+    Write-Host "  .\setup.ps1 config      - Run quickstart validation"
     Write-Host "  .\setup.ps1 validate    - Validate system setup"
     Write-Host ""
     Write-Host "Example usage:" -ForegroundColor Green
@@ -59,23 +59,39 @@ switch ($Command) {
     "help" { Show-Help }
     
     "install" { 
-        Invoke-Command-Safe "python setup.py" "Installing production dependencies"
+        Invoke-Command-Safe "python -m pip install -e . --force-reinstall" "Installing package (editable)"
     }
     
     "install-dev" { 
-        Invoke-Command-Safe "python setup.py --dev" "Installing development dependencies"
+        $editable = Invoke-Command-Safe "python -m pip install -e . --force-reinstall" "Installing package (editable)"
+        if ($editable) {
+            Invoke-Command-Safe "python -m pip install -r requirements-dev.txt" "Installing development dependencies"
+        }
     }
     
     "check" { 
-        Invoke-Command-Safe "python setup.py --check" "Checking environment"
+        Invoke-Command-Safe "python tools/validate_system.py" "Checking environment"
     }
     
     "upgrade" { 
-        Invoke-Command-Safe "python setup.py --upgrade" "Upgrading dependencies"
+        $prodUpgrade = Invoke-Command-Safe "python -m pip install --upgrade -r requirements.txt" "Upgrading production dependencies"
+        if ($prodUpgrade -and (Test-Path "requirements-dev.txt")) {
+            Invoke-Command-Safe "python -m pip install --upgrade -r requirements-dev.txt" "Upgrading development dependencies"
+        }
     }
     
     "clean" { 
-        Invoke-Command-Safe "python setup.py --clean" "Cleaning environment"
+        Write-Host "🧹 Removing .venv virtual environment (if present)..." -ForegroundColor Blue
+        if (Test-Path ".venv") {
+            try {
+                Remove-Item -Recurse -Force ".venv"
+                Write-Host "✅ .venv removed" -ForegroundColor Green
+            } catch {
+                Write-Host "❌ Failed to remove .venv: $_" -ForegroundColor Red
+            }
+        } else {
+            Write-Host "ℹ️ No .venv directory found" -ForegroundColor Yellow
+        }
     }
     
     "lint" {
@@ -95,17 +111,17 @@ switch ($Command) {
     
     "run" {
         Write-Host "🚀 Running EPGB Options..." -ForegroundColor Blue
-        Invoke-Command-Safe "python main_HM.py" "Running application"
+        Invoke-Command-Safe "python -m epgb_options" "Running application"
     }
     
     "config" {
-        Write-Host "⚙️ Running configuration migration..." -ForegroundColor Blue
-        Invoke-Command-Safe "python tools/create_configs.py" "Configuration migration"
+        Write-Host "⚙️ Running quickstart validation..." -ForegroundColor Blue
+        Invoke-Command-Safe "python tools/validate_quickstart.py" "Quickstart validation"
     }
     
     "validate" {
         Write-Host "✅ Validating system setup..." -ForegroundColor Blue
-        Invoke-Command-Safe "python validate_system.py" "System validation"
+        Invoke-Command-Safe "python tools/validate_system.py" "System validation"
     }
     
     "quality" {
@@ -122,9 +138,12 @@ switch ($Command) {
     
     "dev-setup" {
         Write-Host "🔧 Setting up development environment..." -ForegroundColor Blue
-        $installResult = Invoke-Command-Safe "python setup.py --dev" "Installing development dependencies"
-        
+        $installResult = Invoke-Command-Safe "python -m pip install -e . --force-reinstall" "Installing package (editable)"
         if ($installResult) {
+            $devDeps = Invoke-Command-Safe "python -m pip install -r requirements-dev.txt" "Installing development dependencies"
+        }
+        
+        if ($installResult -and $devDeps) {
             Write-Host "🔧 Setting up pre-commit hooks..." -ForegroundColor Blue
             try {
                 pre-commit install

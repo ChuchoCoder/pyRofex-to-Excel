@@ -46,6 +46,9 @@ class SheetOperations:
         
         # Display symbol cache for performance optimization
         self._display_symbol_cache = {}
+
+        # Styling guard (apply heavy formatting only once per session)
+        self._prices_style_applied = False
     
     def set_instrument_cache(self, instrument_cache):
         """
@@ -347,10 +350,235 @@ class SheetOperations:
                 # Optional: Format headers (bold)
                 sheet.range('A1:O1').font.bold = True
                 logger.debug("Encabezados creados exitosamente")
+
+            # Ensure cauciones table headers and days column exist
+            self._ensure_cauciones_layout(sheet)
+
+            # Visual formatting is applied only in first-time worksheet bootstrap (WorkbookManager)
                 
         except Exception as e:
             logger.error(f"Error al asegurar que existan los encabezados: {e}")
             raise
+
+    def _apply_marketdata_sheet_style(self, sheet: xw.Sheet):
+        """Aplicar formato visual y de tipos de datos para la hoja de MarketData."""
+        if self._prices_style_applied:
+            return
+
+        try:
+            # Theme colors (dark mode similar to reference image)
+            header_bg = (26, 26, 26)
+            header_fg = (255, 255, 255)
+            body_bg = (0, 0, 0)
+            cyan_fg = (104, 173, 255)
+            yellow_fg = (243, 224, 116)
+            separator_bg = (96, 96, 96)
+
+            # Paint background/body area
+            sheet.range('A1:Z2000').color = body_bg
+            sheet.range('A2:O2000').font.color = cyan_fg
+            sheet.range('Q2:Z2000').font.color = header_fg
+
+            # Global font
+            sheet.range('A:Z').font.name = 'Calibri'
+            sheet.range('A:Z').font.size = 9
+
+            # Separator column between market table and cauciones table
+            sheet.range('P:P').color = separator_bg
+            sheet.range('P:P').column_width = 2.5
+
+            # Headers style
+            sheet.range('A1:O1').color = header_bg
+            sheet.range('A1:O1').font.color = header_fg
+            sheet.range('A1:O1').font.bold = True
+
+            sheet.range('Q1:Z1').color = header_bg
+            sheet.range('Q1:Z1').font.color = header_fg
+            sheet.range('Q1:Z1').font.bold = True
+
+            # Header font
+            sheet.range('A1:Z1').font.name = 'Calibri'
+            sheet.range('A1:Z1').font.size = 9
+
+            # Column widths (close to screenshot proportions)
+            column_widths = {
+                'A': 14, 'B': 9, 'C': 10, 'D': 10, 'E': 9, 'F': 9,
+                'G': 9, 'H': 9, 'I': 9, 'J': 9, 'K': 12, 'L': 13,
+                'M': 12, 'N': 11, 'O': 10,
+                'Q': 8, 'R': 9, 'S': 12, 'T': 9, 'U': 14,
+                'V': 13, 'W': 12, 'X': 13, 'Y': 13, 'Z': 10,
+            }
+            for col, width in column_widths.items():
+                sheet.range(f'{col}:{col}').column_width = width
+
+            # Per-column font colors (close to screenshot)
+            sheet.range('A:A').font.color = header_fg       # symbol
+            sheet.range('B:B').font.color = cyan_fg         # bid_size
+            sheet.range('C:D').font.color = yellow_fg       # bid/ask
+            sheet.range('E:E').font.color = cyan_fg         # ask_size
+            sheet.range('F:F').font.color = yellow_fg       # last
+            sheet.range('H:K').font.color = cyan_fg         # open/high/low/prev_close
+            sheet.range('L:N').font.color = cyan_fg         # turnover/volume/operations
+            sheet.range('O:O').font.color = header_fg       # datetime
+
+            # Right block base colors
+            sheet.range('Q:S').font.color = header_fg
+            sheet.range('U:V').font.color = header_fg
+            sheet.range('Y:Y').font.color = header_fg
+
+            # Row heights
+            sheet.range('1:1').row_height = 20
+            sheet.range('2:400').row_height = 18
+
+            # Number/date/time formats
+            sheet.range('B:B').number_format = '#,##0'
+            sheet.range('E:E').number_format = '#,##0'
+            sheet.range('N:N').number_format = '#,##0'
+            sheet.range('Q:Q').number_format = '#,##0'
+
+            sheet.range('C:C').number_format = '0.000'
+            sheet.range('D:D').number_format = '0.000'
+            sheet.range('F:F').number_format = '0.000'
+            sheet.range('H:H').number_format = '0.000'
+            sheet.range('I:I').number_format = '0.000'
+            sheet.range('J:J').number_format = '0.000'
+            sheet.range('K:K').number_format = '0.000'
+
+            sheet.range('L:L').number_format = '#,##0'
+            sheet.range('M:M').number_format = '#,##0'
+            sheet.range('U:U').number_format = '#,##0'
+            sheet.range('V:V').number_format = '#,##0'
+            sheet.range('Y:Y').number_format = '#,##0'
+
+            # Percentages with color coding
+            percent_format = '[Green]0.00%;[Red]-0.00%;0.00%'
+            sheet.range('G:G').number_format = percent_format
+            sheet.range('T:T').number_format = percent_format
+            sheet.range('W:W').number_format = percent_format
+            sheet.range('X:X').number_format = percent_format
+            sheet.range('Z:Z').number_format = percent_format
+
+            # Emphasize percentage columns with bright green base color
+            pct_green = (0, 255, 170)
+            sheet.range('G:G').font.color = pct_green
+            sheet.range('T:T').font.color = pct_green
+            sheet.range('W:X').font.color = pct_green
+
+            # Date/time columns
+            sheet.range('O:O').number_format = 'hh:mm:ss'
+            sheet.range('S:S').number_format = 'd/m/yyyy'
+
+            # Text columns
+            sheet.range('A:A').number_format = '@'
+            sheet.range('R:R').number_format = '@'
+
+            # Alignment
+            sheet.range('A:Z').api.HorizontalAlignment = -4108  # xlCenter
+            sheet.range('A:A').api.HorizontalAlignment = -4131  # xlLeft
+            sheet.range('R:R').api.HorizontalAlignment = -4131  # xlLeft
+
+            # Thin borders for the two main tables
+            left_table = sheet.range('A1:O2000')
+            right_table = sheet.range('Q1:Z2000')
+            for table_range in (left_table, right_table):
+                table_range.api.Borders.LineStyle = 1  # xlContinuous
+                table_range.api.Borders.Weight = 1     # xlThin
+
+            # Freeze panes below header row
+            try:
+                sheet.range('A2').select()
+                sheet.book.app.api.ActiveWindow.FreezePanes = True
+            except Exception:
+                pass
+
+            self._prices_style_applied = True
+
+        except Exception as e:
+            logger.warning(f"No se pudo aplicar formato visual de MarketData: {e}")
+
+    def _ensure_cauciones_layout(self, sheet: xw.Sheet):
+        """
+        Asegurar layout mínimo de cauciones en el lateral derecho de la hoja Prices.
+
+        - Headers en Q1:Z1
+        - Columna Q con número de días (1..33)
+        - Columna R con texto de plazo ("1 día", "2 días", ...)
+        - Columna Z con promedio TLR
+        """
+        try:
+            expected_headers = [
+                'Promedio T.',
+                'Plazo',
+                'Vencimiento',
+                'Tasa',
+                'Monto $',
+                'Monto Tomador',
+                'Tasa Tomadora',
+                'Tasa Colocadora',
+                'Monto Colocador',
+                'Prom. TLR',
+            ]
+
+            current_headers = sheet.range('Q1:Z1').value
+            if not current_headers or current_headers[0] != 'Promedio T.':
+                sheet.range('Q1:Z1').value = expected_headers
+                sheet.range('Q1:Z1').font.bold = True
+
+            # Seed days/plazo rows if empty (1..33)
+            existing_plazo = sheet.range('R2:R34').value
+            existing_days = sheet.range('Q2:Q34').value
+
+            # Normalize single-value reads to list
+            if existing_plazo is None:
+                existing_plazo = []
+            if existing_days is None:
+                existing_days = []
+            if not isinstance(existing_plazo, list):
+                existing_plazo = [existing_plazo]
+            if not isinstance(existing_days, list):
+                existing_days = [existing_days]
+
+            plazo_values = []
+            day_values = []
+            for i in range(1, 34):
+                idx = i - 1
+
+                current_day = existing_days[idx] if idx < len(existing_days) else None
+                if current_day is None or str(current_day).strip() == '':
+                    day_values.append([i])
+                else:
+                    day_values.append([current_day])
+
+                current_plazo = existing_plazo[idx] if idx < len(existing_plazo) else None
+                if current_plazo is None or str(current_plazo).strip() == '':
+                    label = f"{i} día" if i == 1 else f"{i} días"
+                    plazo_values.append([label])
+                else:
+                    plazo_values.append([current_plazo])
+
+            sheet.range('Q2:Q34').value = day_values
+            sheet.range('R2:R34').value = plazo_values
+
+            # Promedio TLR en Z2 (si no existe)
+            existing_prom_tlr = sheet.range('Z2').value
+            if existing_prom_tlr is None or str(existing_prom_tlr).strip() == '':
+                formula_set = False
+                for formula_candidate in (
+                    '=IFERROR(AVERAGEIF(T2:T8,"<>0"),0)',
+                    '=IFERROR(AVERAGEIF(T2:T8;"<>0");0)',
+                ):
+                    try:
+                        sheet.range('Z2').formula = formula_candidate
+                        formula_set = True
+                        break
+                    except Exception:
+                        continue
+
+                if not formula_set:
+                    logger.warning("No se pudo establecer fórmula de Prom. TLR en Z2")
+
+        except Exception as e:
+            logger.warning(f"No se pudo asegurar layout de cauciones: {e}")
     
     def _remove_duplicate_rows(self, sheet: xw.Sheet, row_numbers: list):
         """

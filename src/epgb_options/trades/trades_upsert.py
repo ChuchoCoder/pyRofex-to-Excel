@@ -12,7 +12,8 @@ from typing import Dict
 import pandas as pd
 import xlwings as xw
 
-from ..config.excel_config import EXCEL_SHEET_TRADES, TRADES_COLUMNS
+from ..config.excel_config import (EXCEL_SHEET_PRICES, EXCEL_SHEET_TICKERS,
+                                   EXCEL_SHEET_TRADES, TRADES_COLUMNS)
 from ..utils.logging import get_logger
 
 # Suppress pandas FutureWarning about unorderable types in merge
@@ -429,6 +430,7 @@ class TradesUpserter:
     
     def _get_or_create_trades_sheet(self) -> xw.Sheet:
         """Get or create Trades sheet in workbook."""
+        created = False
         try:
             sheet = self.workbook.sheets[EXCEL_SHEET_TRADES]
             logger.debug(f"Trades sheet '{EXCEL_SHEET_TRADES}' found")
@@ -448,8 +450,26 @@ class TradesUpserter:
             sheet = self.workbook.sheets.add(EXCEL_SHEET_TRADES)
             self._create_headers(sheet)
             logger.debug(f"Created new Trades sheet: '{EXCEL_SHEET_TRADES}'")
+            created = True
+
+        if created:
+            self._enforce_sheet_order()
         
         return sheet
+
+    def _enforce_sheet_order(self):
+        """Ensure canonical workbook sheet order: Tickers, MarketData/Prices, Trades."""
+        preferred_order = [EXCEL_SHEET_TICKERS, EXCEL_SHEET_PRICES, EXCEL_SHEET_TRADES]
+        try:
+            for sheet_name in reversed(preferred_order):
+                try:
+                    sheet = self.workbook.sheets[sheet_name]
+                    first_sheet = self.workbook.sheets[0]
+                    sheet.api.Move(Before=first_sheet.api)
+                except Exception:
+                    continue
+        except Exception as e:
+            logger.warning(f"Could not enforce sheet order: {e}")
     
     def _create_headers(self, sheet: xw.Sheet):
         """Create header row in new Trades sheet."""

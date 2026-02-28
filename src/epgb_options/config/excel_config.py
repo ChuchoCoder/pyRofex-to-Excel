@@ -19,9 +19,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuración de Excel - Las variables de entorno sobrescriben estos valores por defecto
-EXCEL_FILE = os.getenv('EXCEL_FILE', 'EPGB OC-DI - Python.xlsb')
+EXCEL_FILE = os.getenv('EXCEL_FILE', 'pyRofex-Market-Data.xlsb')
 EXCEL_PATH = os.getenv('EXCEL_PATH', './')
-EXCEL_SHEET_PRICES = os.getenv('EXCEL_SHEET_PRICES', 'HomeBroker')
+EXCEL_SHEET_PRICES = os.getenv('EXCEL_SHEET_PRICES', 'MarketData')
 EXCEL_SHEET_TICKERS = os.getenv('EXCEL_SHEET_TICKERS', 'Tickers')
 
 # Intervalo de actualización de Excel en segundos
@@ -68,10 +68,13 @@ def validate_excel_config():
     if not EXCEL_FILE.lower().endswith(('.xlsx', '.xlsb', '.xlsm')):
         errors.append(f"Extensión de archivo de Excel inválida: {EXCEL_FILE}. Se esperaba .xlsx, .xlsb, o .xlsm")
     
-    # Verificar si el archivo existe
-    excel_file_path = os.path.join(EXCEL_PATH, EXCEL_FILE)
-    if not os.path.exists(excel_file_path):
-        errors.append(f"Archivo de Excel no encontrado: {excel_file_path}")
+    # Verificar que la ruta base exista o sea creable
+    try:
+        excel_path_obj = Path(EXCEL_PATH)
+        if excel_path_obj.exists() and not excel_path_obj.is_dir():
+            errors.append(f"EXCEL_PATH no es una carpeta válida: {EXCEL_PATH}")
+    except Exception as e:
+        errors.append(f"EXCEL_PATH inválido ({EXCEL_PATH}): {e}")
     
     # Verificar que los nombres de las hojas no estén vacíos
     if not EXCEL_SHEET_PRICES.strip():

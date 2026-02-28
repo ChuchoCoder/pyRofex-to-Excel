@@ -169,7 +169,7 @@ EPGB_pyRofex/
 │   └── specs/          # Feature specifications
 │
 ├── .env.example        # Environment variable template
-├── EPGB OC-DI - Python.xlsb  # Excel workbook
+├── pyRofex-Market-Data.xlsb  # Excel workbook
 ├── .gitignore          # Git ignore patterns
 ├── README.md           # User documentation (Spanish)
 └── CONTRIBUTING.md     # Developer documentation (English)

@@ -11,11 +11,9 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from .config import (EXCEL_FILE, EXCEL_PATH, EXCEL_SHEET_PRICES,
-                     EXCEL_SHEET_TICKERS, EXCEL_UPDATE_INTERVAL,
-                     TRADES_REALTIME_ENABLED, TRADES_SYNC_ENABLED,
-                     TRADES_SYNC_INTERVAL_SECONDS, validate_excel_config,
-                     validate_pyRofex_config)
+from .config import validate_excel_config, validate_pyRofex_config
+from .config import excel_config as excel_config_module
+from .config.bootstrap import run_first_time_bootstrap
 from .excel import SheetOperations, SymbolLoader, WorkbookManager
 from .market_data import DataProcessor, WebSocketHandler, pyRofexClient
 from .trades import ExecutionFetcher, TradesProcessor, TradesUpserter
@@ -89,13 +87,13 @@ class EPGBOptionsApp:
             
             # Configurar logging
             setup_logging()
+
+            # Bootstrap inicial: completar configuración requerida y preparar valores runtime
+            if not run_first_time_bootstrap():
+                return False
             
             # Validar configuraciones
             if not self._validate_configurations():
-                return False
-            
-            # Inicializar componentes de datos de mercado (poblar cache de instrumentos)
-            if not self._initialize_market_data_components():
                 return False
             
             # Inicializar componentes de Excel
@@ -104,6 +102,10 @@ class EPGBOptionsApp:
             
             # Cargar símbolos desde Excel
             if not self._load_symbols():
+                return False
+
+            # Inicializar componentes de datos de mercado (poblar cache de instrumentos)
+            if not self._initialize_market_data_components():
                 return False
             
             # Validar y filtrar símbolos contra el cache de instrumentos
@@ -117,8 +119,8 @@ class EPGBOptionsApp:
             self.sheet_operations.set_instrument_cache(self.api_client.instrument_cache)
             
             # Inicializar componentes de Trades si está habilitado
-            logger.debug(f"TRADES_SYNC_ENABLED = {TRADES_SYNC_ENABLED}")
-            if TRADES_SYNC_ENABLED:
+            logger.debug(f"TRADES_SYNC_ENABLED = {excel_config_module.TRADES_SYNC_ENABLED}")
+            if excel_config_module.TRADES_SYNC_ENABLED:
                 logger.info("Trades sync está habilitado, inicializando componentes...")
                 try:
                     if not self._initialize_trades_components():
@@ -164,21 +166,28 @@ class EPGBOptionsApp:
         
         logger.info("✅ Validación de configuración exitosa")
         return True
-    
+
     def _initialize_excel_components(self) -> bool:
         """Inicializar componentes relacionados a Excel."""
         try:
             logger.info("Inicializando componentes de Excel...")
             
             # Inicializar el administrador de libro
-            self.workbook_manager = WorkbookManager(EXCEL_FILE, EXCEL_PATH)
-            if not self.workbook_manager.connect():
+            self.workbook_manager = WorkbookManager(excel_config_module.EXCEL_FILE, excel_config_module.EXCEL_PATH)
+            if not self.workbook_manager.connect(create_if_missing=True):
+                return False
+
+            if not self.workbook_manager.bootstrap_required_sheets(
+                prices_sheet_name=excel_config_module.EXCEL_SHEET_PRICES,
+                tickers_sheet_name=excel_config_module.EXCEL_SHEET_TICKERS,
+                trades_sheet_name=excel_config_module.EXCEL_SHEET_TRADES,
+            ):
                 return False
             
             # Obtener hoja de tickers
-            tickers_sheet = self.workbook_manager.get_sheet(EXCEL_SHEET_TICKERS)
+            tickers_sheet = self.workbook_manager.get_sheet(excel_config_module.EXCEL_SHEET_TICKERS)
             if not tickers_sheet:
-                logger.error(f"No se pudo acceder a la hoja {EXCEL_SHEET_TICKERS}")
+                logger.error(f"No se pudo acceder a la hoja {excel_config_module.EXCEL_SHEET_TICKERS}")
                 return False
             
             # Inicializar cargador de símbolos
@@ -230,8 +239,11 @@ class EPGBOptionsApp:
             
             total_symbols = len(self.options_df) + len(self.everything_df)
             logger.info(f"✅ Total de símbolos cargados: {total_symbols}")
-            
-            return total_symbols > 0
+
+            if total_symbols == 0:
+                logger.warning("No hay símbolos cargados todavía. Podés agregarlos en la hoja Tickers sin reiniciar Excel.")
+
+            return True
             
         except Exception as e:
             logger.error(f"Error al cargar símbolos: {e}")
@@ -334,8 +346,7 @@ class EPGBOptionsApp:
             logger.info(f"✅ {total_valid} símbolos válidos listos para suscripción")
             
             if total_valid == 0:
-                logger.error("❌ No hay símbolos válidos después del filtrado")
-                return False
+                logger.warning("No hay símbolos válidos después del filtrado. La app seguirá en ejecución hasta que agregues símbolos.")
             
             return True
             
@@ -431,7 +442,7 @@ class EPGBOptionsApp:
             self._sync_filled_orders()
             
             # Set up real-time updates if enabled
-            if TRADES_REALTIME_ENABLED:
+            if excel_config_module.TRADES_REALTIME_ENABLED:
                 logger.info("⚡ Real-time trades updates ENABLED via WebSocket")
                 
                 # Define execution callback for real-time updates
@@ -458,7 +469,7 @@ class EPGBOptionsApp:
                     logger.error("Failed to subscribe to order reports")
                     return False
             else:
-                logger.info(f"⏱️  Real-time trades updates DISABLED - using periodic sync every {TRADES_SYNC_INTERVAL_SECONDS}s")
+                logger.info(f"⏱️  Real-time trades updates DISABLED - using periodic sync every {excel_config_module.TRADES_SYNC_INTERVAL_SECONDS}s")
             
             # Initialize sync timer
             self.last_trades_sync_time = datetime.now()
@@ -523,7 +534,7 @@ class EPGBOptionsApp:
         
         elapsed = (datetime.now() - self.last_trades_sync_time).total_seconds()
         
-        if elapsed >= TRADES_SYNC_INTERVAL_SECONDS:
+        if elapsed >= excel_config_module.TRADES_SYNC_INTERVAL_SECONDS:
             # Sync quietly - status shown in unified line
             logger.debug(f"Periodic trades sync triggered ({elapsed:.0f}s elapsed)")
             self._sync_filled_orders()
@@ -668,7 +679,7 @@ class EPGBOptionsApp:
             # Single bulk update to Excel (eliminates flicker from separate updates)
             if not combined_df.empty:
                 success = self.sheet_operations.update_market_data_to_prices_sheet(
-                    combined_df, EXCEL_SHEET_PRICES, self.cauciones_df
+                    combined_df, excel_config_module.EXCEL_SHEET_PRICES, self.cauciones_df
                 )
                 if not success:
                     logger.warning("Fallo al actualizar hoja Prices")
@@ -696,7 +707,7 @@ class EPGBOptionsApp:
         
         # Orders stats (if trades sync is enabled)
         orders_str = ""
-        if TRADES_SYNC_ENABLED:
+        if excel_config_module.TRADES_SYNC_ENABLED:
             orders_count = self.orders_stats['total_filled']
             orders_str = f" | 📝 {orders_count} orders"
             
@@ -799,7 +810,7 @@ class EPGBOptionsApp:
                     self._update_unified_status()
                     
                     # Periodic trades sync if real-time is disabled
-                    if TRADES_SYNC_ENABLED and not TRADES_REALTIME_ENABLED:
+                    if excel_config_module.TRADES_SYNC_ENABLED and not excel_config_module.TRADES_REALTIME_ENABLED:
                         self._check_and_sync_trades()
                     
                     # Show full summary only occasionally (every 60 cycles)
@@ -816,7 +827,7 @@ class EPGBOptionsApp:
                         )
                     
                     # Dormir por el intervalo configurado
-                    time.sleep(EXCEL_UPDATE_INTERVAL)
+                    time.sleep(excel_config_module.EXCEL_UPDATE_INTERVAL)
                     
             except KeyboardInterrupt:
                 logger.info("Interrupción de teclado recibida - cerrando correctamente")

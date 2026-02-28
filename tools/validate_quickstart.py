@@ -92,7 +92,7 @@ except ImportError as e:
 print("\n🔍 Step 2: Excel File Availability Test")
 import os
 
-excel_file = 'EPGB OC-DI - Python.xlsb'
+excel_file = 'pyRofex-Market-Data.xlsb'
 if os.path.exists(excel_file):
     log_test_result("Excel file exists", True, f"Found {excel_file}")
     
