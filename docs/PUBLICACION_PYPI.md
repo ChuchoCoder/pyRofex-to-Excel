@@ -20,11 +20,10 @@ python -m build
 python -m twine check dist/*
 ```
 
-2. Publicar primero en TestPyPI
+2. Publicar primero en TestPyPI (recomendado: workflow de GitHub)
 
-```bash
-python -m twine upload --repository testpypi dist/*
-```
+- Ejecutar `Package Release` con `repository=testpypi`.
+- El workflow usa Trusted Publishing (OIDC), sin tokens estáticos.
 
 3. Probar instalación desde TestPyPI
 
@@ -34,9 +33,7 @@ python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-ur
 
 4. Publicar en PyPI
 
-```bash
-python -m twine upload dist/*
-```
+- Ejecutar `Package Release` con `repository=pypi`, o push de tag `v*`.
 
 ## Automatización con GitHub Actions
 
@@ -50,16 +47,15 @@ El repositorio ahora tiene dos workflows:
 - Release de paquete: [.github/workflows/package-release.yml](../.github/workflows/package-release.yml)
 	- Manual (`workflow_dispatch`) para elegir `testpypi` o `pypi`.
 	- Automático a PyPI al pushear tags `v*`.
+	- Publica con `pypa/gh-action-pypi-publish` + OIDC (Trusted Publishing).
 
 ## Credenciales y seguridad para publicación
 
-- Usar token de API de PyPI/TestPyPI (no usuario/password).
-- Guardar tokens en variables de entorno o keyring del sistema.
-- No versionar secretos en el repo.
+- Método recomendado: Trusted Publishing (OIDC) desde GitHub Actions.
+- No requiere `PYPI_API_TOKEN`/`TEST_PYPI_API_TOKEN` en GitHub Secrets.
+- Configurar Trusted Publisher en PyPI/TestPyPI para este repo + workflow + environment.
 
-Secrets esperados por el workflow de release:
-- `TEST_PYPI_API_TOKEN`
-- `PYPI_API_TOKEN`
+Solo usar `twine upload` con token como fallback manual/local.
 
 ## Checklist previo recomendado
 
