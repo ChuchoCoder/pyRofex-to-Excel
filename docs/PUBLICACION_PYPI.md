@@ -10,7 +10,7 @@ El proyecto ya cuenta con lo esencial para empaquetado:
 - entrypoint CLI: `pyrofex-to-excel`
 - layout `src/` compatible
 
-## Recomendación de release
+## Estrategia recomendada
 
 1. Probar build local
 
@@ -20,9 +20,11 @@ python -m build
 python -m twine check dist/*
 ```
 
-2. Publicar primero en TestPyPI (recomendado: workflow de GitHub)
+2. Validar en TestPyPI (canal de testing)
 
-- Ejecutar `Package Release` con `repository=testpypi`.
+- Flujo principal: abrir PR y pushear cambios al PR.
+- El workflow `Package Release` publica automáticamente en TestPyPI para PRs internos.
+- También se puede forzar manualmente con `workflow_dispatch` + `repository=testpypi`.
 - El workflow usa Trusted Publishing (OIDC), sin tokens estáticos.
 
 3. Probar instalación desde TestPyPI
@@ -31,9 +33,10 @@ python -m twine check dist/*
 python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple pyrofex-to-excel
 ```
 
-4. Publicar en PyPI
+4. Publicar en PyPI (canal de usuarios finales)
 
-- Ejecutar `Package Release` con `repository=pypi`, o push de tag `v*`.
+- Publicar un GitHub Release (`release.published`) con el tag/version final.
+- Alternativa manual: `workflow_dispatch` con `repository=pypi`.
 
 ## Automatización con GitHub Actions
 
@@ -45,9 +48,11 @@ El repositorio ahora tiene dos workflows:
 	- Ejecuta `twine check` para validar metadatos/render de distribución.
 
 - Release de paquete: [.github/workflows/package-release.yml](../.github/workflows/package-release.yml)
-	- Manual (`workflow_dispatch`) para elegir `testpypi` o `pypi`.
-	- Automático a PyPI al pushear tags `v*`.
+	- `pull_request` (`opened`, `synchronize`, `reopened`) publica en TestPyPI con versión `dev` automática.
+	- `release.published` publica en PyPI.
+	- Manual (`workflow_dispatch`) permite elegir `testpypi` o `pypi`.
 	- Publica con `pypa/gh-action-pypi-publish` + OIDC (Trusted Publishing).
+	- En PRs desde forks no publica (seguridad), pero sí ejecuta build/checks.
 
 ## Credenciales y seguridad para publicación
 
@@ -73,3 +78,10 @@ Aunque el paquete pueda instalarse con pip, la operación real requiere:
 - credenciales válidas de pyRofex
 
 Eso debe estar muy claro en la descripción del paquete para reducir issues de instalación en entornos no compatibles.
+
+## Documentación para usuarios finales
+
+Para instalar y ejecutar sin clonar el repositorio, ver:
+- [INSTALACION_SIN_CLONAR.md](INSTALACION_SIN_CLONAR.md)
+
+Importante: usuarios finales deben instalar desde PyPI. TestPyPI queda reservado para testing de desarrollo/CI.

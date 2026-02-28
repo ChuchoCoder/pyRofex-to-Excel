@@ -5,25 +5,37 @@
 
 Aplicación Python para obtener datos de mercado en tiempo real desde pyRofex y volcarlos a Excel.
 
-## 🚀 Correr desde cero (sin configuración previa)
+## 🚀 Correr desde cero (paquete publicado en PyPI)
 
-Si acabás de clonar el repositorio y no tenés nada configurado, seguí exactamente estos pasos:
+Si solo querés usar la app (sin clonar el repo), este es el camino más simple.
 
 1. Requisitos mínimos
    - Windows + Microsoft Excel instalado
    - Python 3.9 o superior
 
-2. Clonar e instalar
+2. Crear carpeta de trabajo y entorno virtual
 
 ```bash
-git clone https://github.com/ChuchoCoder/pyRofex_To_Excel.git
-cd pyRofex_To_Excel
+mkdir pyrofex-app
+cd pyrofex-app
 python -m venv .venv
 .venv\Scripts\activate
-pip install -e . --force-reinstall
+python -m pip install --upgrade pip
 ```
 
-3. Ejecutar por primera vez
+3. Instalar el paquete (PyPI)
+
+```bash
+python -m pip install pyrofex-to-excel
+```
+
+4. Ejecutar la app
+
+```bash
+pyrofex-to-excel
+```
+
+Alternativa equivalente:
 
 ```bash
 python -m pyRofex_To_Excel
@@ -34,6 +46,36 @@ Qué pasa automáticamente en ese primer arranque:
 - Si no existe workbook, crea uno nuevo (`.xlsx`) en la ruta configurada.
 - Crea y prepara hojas base: `Tickers`, `MarketData`, `Trades`, `Formulas`.
 - Intenta poblar `Tickers` con instrumentos desde caché local.
+
+5. Verificar que está funcionando
+- Abrí el workbook generado.
+- Confirmá que existen las hojas `Tickers`, `MarketData`, `Trades` y `Formulas`.
+- En `MarketData` deberían empezar a actualizarse precios.
+
+Para guía completa sin clonar (actualización/desinstalación), ver [docs/INSTALACION_SIN_CLONAR.md](docs/INSTALACION_SIN_CLONAR.md).
+
+## 🛠️ Correr con repositorio clonado (modo desarrollo)
+
+Si vas a desarrollar en este proyecto:
+
+```bash
+git clone https://github.com/ChuchoCoder/EPGB_pyRofex.git
+cd EPGB_pyRofex
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e . --force-reinstall
+python -m pyRofex_To_Excel
+```
+
+### 📦 Nota para desarrolladores: TestPyPI
+
+TestPyPI se usa solo para pruebas de CI/CD (por ejemplo, builds de PR) y no para usuarios finales.
+
+Si necesitás instalar un build de testing:
+
+```bash
+python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple pyrofex-to-excel
+```
 
 ### 🗂️ Detalle exacto de preguntas en primer inicio
 
@@ -67,23 +109,13 @@ Notas de operación:
 - Si ejecutás en entorno no interactivo (ej. CI) y faltan credenciales, la app falla rápido y te pide setearlas en `.env`.
 - Si el workbook configurado no existe y termina en `.xlsb`, el bootstrap lo normaliza a `.xlsx` para poder crearlo automáticamente.
 
-4. Verificar que está funcionando
-- Abrí el workbook generado.
-- Confirmá que existen las hojas mencionadas.
-- En `MarketData` deberían empezar a actualizarse precios.
-- En `Formulas` tenés ejemplos listos para copy/paste con parámetros editables.
+### ⚡ Atajos opcionales (desarrollo)
 
-5. Si necesitás correr con script helper
+Si preferís usar script helper:
 
 ```bash
 .\setup.ps1 install
 .\setup.ps1 run
-```
-
-También podés ejecutar por comando CLI del paquete:
-
-```bash
-pyrofex-to-excel
 ```
 
 ## 📌 Qué hace la app
@@ -130,6 +162,7 @@ python tools/validate_quickstart.py
 
 - Funcionalidades nuevas y cambios relevantes: [docs/FUNCIONALIDADES_NUEVAS.md](docs/FUNCIONALIDADES_NUEVAS.md)
 - Publicación como paquete pip (PyPI/TestPyPI): [docs/PUBLICACION_PYPI.md](docs/PUBLICACION_PYPI.md)
+- Instalación y uso sin clonar (paquete publicado): [docs/INSTALACION_SIN_CLONAR.md](docs/INSTALACION_SIN_CLONAR.md)
 
 ## 📦 ¿Se puede publicar como paquete pip?
 
