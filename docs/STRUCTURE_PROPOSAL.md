@@ -1,4 +1,4 @@
-# EPGB Options - Improved Project Structure
+# pyRofex-To-Excel - Improved Project Structure
 
 ## 🎯 Current Issues
 - **main_HM.py** (899 lines) - Monolithic file with mixed responsibilities
@@ -10,17 +10,15 @@
 ## 🏗️ Proposed Structure
 
 ```
-EPGB_pyRofex/
+pyRofex_To_Excel/
 ├── pyproject.toml              # Modern project configuration
 ├── README.md                   # Project documentation
-├── requirements.txt            # Dependencies
-├── requirements-dev.txt        # Dev dependencies
-├── setup.py                   # Setup script
+├── setup.py                   # Legacy setup script (optional)
 ├── Makefile                   # Build commands
 ├── setup.ps1                  # Windows setup script
 │
 ├── src/                       # Source code package (NEW)
-│   └── epgb_options/          # Main application package
+│   └── pyRofex_To_Excel/      # Main application package
 │       ├── __init__.py        # Package init
 │       ├── main.py            # Application entry point (simplified)
 │       │
@@ -54,7 +52,7 @@ EPGB_pyRofex/
 │   └── validate_quickstart.py # Quickstart validation
 │
 ├── data/                      # Data files (NEW)
-│   ├── EPGB OC-DI - Python.xlsb # Excel workbook
+│   ├── pyRofex-Market-Data.xlsb # Excel workbook
 │   └── .env.example           # Environment template
 │
 ├── tests/                     # Test suite (NEW)
@@ -78,7 +76,7 @@ EPGB_pyRofex/
 - **utils/**: Reusable utilities
 
 ### 2. **Proper Package Structure**
-- **src/epgb_options/**: Main installable package
+- **src/pyRofex_To_Excel/**: Main installable package
 - **tests/**: Dedicated test suite
 - **tools/**: Development utilities
 - **data/**: Data files separated from code

@@ -6,7 +6,7 @@ Enhanced the Excel symbol display functionality to remove the " - 24hs" suffix f
 ## Changes Made
 
 ### 1. Modified `clean_symbol_for_display()` in `helpers.py`
-**File:** `src/epgb_options/utils/helpers.py`
+**File:** `src/pyRofex_To_Excel/utils/helpers.py`
 
 **Changes:**
 - Added `is_option` parameter to the function
@@ -19,7 +19,7 @@ Enhanced the Excel symbol display functionality to remove the " - 24hs" suffix f
 - **Cauciones:** `"MERV - XMEV - PESOS - 3D"` → `"PESOS - 3D"` (removes only prefix, keeps suffix)
 
 ### 2. Updated `SheetOperations` class in `sheet_operations.py`
-**File:** `src/epgb_options/excel/sheet_operations.py`
+**File:** `src/pyRofex_To_Excel/excel/sheet_operations.py`
 
 **Changes:**
 - Modified `__init__()` to accept optional `instrument_cache` parameter
@@ -40,7 +40,7 @@ display_symbol = clean_symbol_for_display(symbol, is_option=is_option)
 ```
 
 ### 3. Updated initialization flow in `main.py`
-**File:** `src/epgb_options/main.py`
+**File:** `src/pyRofex_To_Excel/main.py`
 
 **Changes:**
 - Added call to `self.sheet_operations.set_instrument_cache()` after initializing market data components

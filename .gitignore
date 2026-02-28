@@ -118,7 +118,7 @@ credentials.json
 .env.local
 local_settings.py
 
-# EPGB Configuration - Environment Variables
+# pyRofex-To-Excel Configuration - Environment Variables
 !.env.example
 .env
 .env.production
@@ -137,3 +137,4 @@ eggs/
 
 # Ignore compiled Rust/python extensions (if any)
 target/
+pyRofex-Market-Data.xlsx

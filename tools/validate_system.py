@@ -1,12 +1,8 @@
 # T020: End-to-End System Validation Script
 # Comprehensive testing of the complete PyRofex integration system
 
-import queue
 import sys
-import threading
-import time
-import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 # Test configuration
@@ -38,7 +34,7 @@ def main():
     print("🔍 T020: End-to-End System Validation")
     print("=" * 60)
     print(f"🕐 Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("📋 Testing new epgb_options package structure\n")
+    print("📋 Testing new pyRofex_To_Excel package structure\n")
 
     # Test 1: Package Imports
     print("🔍 Test 1: Package Import Validation")
@@ -54,13 +50,26 @@ def main():
         from dotenv import load_dotenv
 
         # Import our new package structure
-        from src.epgb_options import main
-        from src.epgb_options.config import excel_config, pyrofex_config
-        from src.epgb_options.excel import workbook_manager
-        from src.epgb_options.market_data import api_client
-        from src.epgb_options.utils import logging as utils_logging
+        from src.pyRofex_To_Excel import main
+        from src.pyRofex_To_Excel.config import excel_config, pyrofex_config
+        from src.pyRofex_To_Excel.excel import workbook_manager
+        from src.pyRofex_To_Excel.market_data import api_client
+        from src.pyRofex_To_Excel.utils import logging as utils_logging
+
+        validated_imports = (
+            pd,
+            pyRofex,
+            xw,
+            load_dotenv,
+            main,
+            excel_config,
+            pyrofex_config,
+            workbook_manager,
+            api_client,
+            utils_logging,
+        )
         
-        log_validation_message("Package Imports", "All required modules imported successfully", True)
+        log_validation_message("Package Imports", f"All required modules imported successfully ({len(validated_imports)} modules)", True)
         VALIDATION_RESULTS['imports'] = True
     except ImportError as e:
         log_validation_message("Package Imports", f"Import error: {e}", False)
@@ -71,8 +80,8 @@ def main():
     print("\n🔍 Test 2: Configuration System")
     try:
         # Test configuration access
-        from src.epgb_options.config import (validate_excel_config,
-                                             validate_pyRofex_config)
+        from src.pyRofex_To_Excel.config import (validate_excel_config,
+                             validate_pyRofex_config)
         
         excel_valid = validate_excel_config()
         pyrofex_valid = validate_pyRofex_config()
@@ -89,12 +98,12 @@ def main():
     print("\n🔍 Test 3: Package Structure Validation")
     try:
         required_paths = [
-            project_root / "src" / "epgb_options" / "__init__.py",
-            project_root / "src" / "epgb_options" / "main.py", 
-            project_root / "src" / "epgb_options" / "config" / "__init__.py",
-            project_root / "src" / "epgb_options" / "market_data" / "__init__.py",
-            project_root / "src" / "epgb_options" / "excel" / "__init__.py",
-            project_root / "src" / "epgb_options" / "utils" / "__init__.py",
+            project_root / "src" / "pyRofex_To_Excel" / "__init__.py",
+            project_root / "src" / "pyRofex_To_Excel" / "main.py", 
+            project_root / "src" / "pyRofex_To_Excel" / "config" / "__init__.py",
+            project_root / "src" / "pyRofex_To_Excel" / "market_data" / "__init__.py",
+            project_root / "src" / "pyRofex_To_Excel" / "excel" / "__init__.py",
+            project_root / "src" / "pyRofex_To_Excel" / "utils" / "__init__.py",
             project_root / ".env.example",
             project_root / "pyproject.toml"
         ]
@@ -124,7 +133,7 @@ def main():
         
         result = subprocess.run([
             sys.executable, '-c', 
-            'from src.epgb_options.main import main; print("Entry point accessible")'
+            'from src.pyRofex_To_Excel.main import main; print("Entry point accessible")'
         ], capture_output=True, text=True, cwd=str(project_root), env=env, timeout=10)
         
         if result.returncode == 0:
@@ -158,7 +167,7 @@ def main():
     
     if overall_success:
         print("\n🎉 New package structure is working correctly!")
-        print("✅ Ready for production use with epgb-options command")
+        print("✅ Ready for production use with pyrofex-to-excel command")
     else:
         print("\nSome tests failed - check the details above")
         print("💡 Most failures are expected during initial setup (credentials, etc.)")

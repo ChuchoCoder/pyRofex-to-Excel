@@ -1,18 +1,18 @@
-# EPGB Options Project Makefile
+# pyRofex-To-Excel Project Makefile
 # Provides convenient commands for common development tasks
 
 .PHONY: help install install-dev check upgrade clean lint format type-check run test
 
 # Default target
 help:
-	@echo "EPGB Options Project Commands"
+	@echo "pyRofex-To-Excel Project Commands"
 	@echo "============================="
 	@echo ""
 	@echo "Setup Commands:"
-	@echo "  make install     - Install production dependencies"
-	@echo "  make install-dev - Install development dependencies"
-	@echo "  make check       - Check current environment"
-	@echo "  make upgrade     - Upgrade all dependencies"
+	@echo "  make install     - Install package (editable)"
+	@echo "  make install-dev - Install package + dev extras"
+	@echo "  make check       - Validate environment"
+	@echo "  make upgrade     - Upgrade pip tooling + reinstall"
 	@echo "  make clean       - Clean virtual environment"
 	@echo ""
 	@echo "Development Commands:"
@@ -27,19 +27,21 @@ help:
 
 # Setup commands
 install:
-	@python setup.py
+	@python -m pip install -e . --force-reinstall
 
 install-dev:
-	@python setup.py --dev
+	@python -m pip install -e ".[dev]" --force-reinstall
 
 check:
-	@python setup.py --check
+	@python tools/validate_system.py
 
 upgrade:
-	@python setup.py --upgrade
+	@python -m pip install --upgrade pip setuptools wheel
+	@python -m pip install -e ".[dev]" --upgrade --force-reinstall
 
 clean:
-	@python setup.py --clean
+	@echo "🧹 Removing .venv if present..."
+	@rm -rf .venv || true
 
 # Development commands  
 lint:
@@ -56,16 +58,16 @@ type-check:
 
 # Application commands
 run:
-	@echo "🚀 Running EPGB Options..."
-	@python main_HM.py
+	@echo "🚀 Running pyRofex-To-Excel..."
+	@pyrofex-to-excel
 
 config:
-	@echo "⚙️ Running configuration migration..."
-	@python tools/create_configs.py
+	@echo "⚙️ Running quickstart validation..."
+	@python tools/validate_quickstart.py
 
 validate:
 	@echo "✅ Validating system setup..."
-	@python validate_system.py
+	@python tools/validate_system.py
 
 # Combined quality checks
 quality: lint type-check

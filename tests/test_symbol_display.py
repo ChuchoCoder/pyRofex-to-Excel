@@ -8,11 +8,11 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
-from epgb_options.utils.helpers import clean_symbol_for_display
+from pyRofex_To_Excel.utils.helpers import clean_symbol_for_display
 
 
-def test_symbol_display_formatting():
-    """Test that symbol display formatting works correctly for options and securities."""
+def run_symbol_display_checks() -> bool:
+    """Run symbol display checks and return True when all cases pass."""
     
     print("=" * 70)
     print("SYMBOL DISPLAY FORMATTING TEST")
@@ -67,6 +67,11 @@ def test_symbol_display_formatting():
     return failed == 0
 
 
+def test_symbol_display_formatting():
+    """Test that symbol display formatting works correctly for options and securities."""
+    assert run_symbol_display_checks()
+
+
 if __name__ == "__main__":
-    success = test_symbol_display_formatting()
+    success = run_symbol_display_checks()
     sys.exit(0 if success else 1)

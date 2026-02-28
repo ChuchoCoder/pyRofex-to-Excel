@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/**
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: |
+          if python -c "import ruff" 2>/dev/null; then
+            ruff check .
+          else
+            echo "ruff no instalado, se omite lint"
+          fi
+
+      - name: Compile source
+        run: python -m compileall -q src
+
+      - name: Build package
+        run: python -m pip install build && python -m build
+
+      - name: Twine check
+        run: python -m pip install twine && python -m twine check dist/*

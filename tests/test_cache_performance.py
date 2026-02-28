@@ -8,122 +8,91 @@ import sys
 import time
 from pathlib import Path
 
+import pytest
+
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'src'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
-from epgb_options.market_data.instrument_cache import InstrumentCache
+from pyRofex_To_Excel.market_data.instrument_cache import InstrumentCache
 
 
-def test_cache_performance():
-    """Test cache performance at each level."""
-    
-    print("=" * 70)
-    print("INSTRUMENT CACHE PERFORMANCE TEST")
-    print("=" * 70)
-    
-    # Initialize cache
-    cache = InstrumentCache(ttl_minutes=30)
-    
-    # Test symbols
-    test_symbols = [
-        "MERV - XMEV - GGAL - 24hs",
-        "MERV - XMEV - YPFD - 24hs",
-        "MERV - XMEV - GFGV78806O - 24hs",  # Option
-        "MERV - XMEV - GFGC47566O - 24hs",  # Option
-        "MERV - XMEV - ALUA - 24hs",
-    ]
-    
-    # Get cache statistics
-    print("\n📊 Initial Cache Statistics:")
+def _build_mock_instruments(total: int = 400) -> list[dict]:
+    """Create deterministic instruments for isolated cache performance testing."""
+    instruments: list[dict] = []
+
+    for idx in range(total):
+        is_option = idx % 2 == 0
+        symbol = (
+            f"MERV - XMEV - GFGV{70000 + idx}O - 24hs"
+            if is_option
+            else f"MERV - XMEV - STK{idx:04d} - 24hs"
+        )
+        instruments.append(
+            {
+                "instrumentId": {"symbol": symbol},
+                "cficode": "OCASPS" if is_option else "ESVUFR",
+            }
+        )
+
+    return instruments
+
+
+@pytest.mark.performance
+def test_cache_performance(tmp_path):
+    """Performance test with isolated cache data and bounded execution time."""
+    cache = InstrumentCache(cache_dir=tmp_path / "cache", ttl_minutes=30)
+    instruments = _build_mock_instruments(total=400)
+    cache.save_instruments(instruments)
+
     stats = cache.get_cache_stats()
-    for key, value in stats.items():
-        print(f"   {key}: {value}")
-    
-    # Test 1: First access (File cache or API)
-    print("\n🔍 Test 1: First Access (File Cache Load)")
-    print("-" * 70)
-    
+    assert stats["memory_cache_active"] is True
+    assert stats["total_instruments"] == 400
+    assert stats["total_options"] == 200
+
+    # Force file-cache path to ensure no dependence on shared external cache state.
+    cache._memory_cache = None
+    cache._memory_cache_timestamp = None
+    cache._symbol_to_instrument.clear()
+    cache._options_symbols = None
+    cache._all_symbols = None
+
     start = time.perf_counter()
     cache_data = cache.get_cached_instruments()
-    elapsed = (time.perf_counter() - start) * 1000
-    
-    if cache_data:
-        print(f"✅ Loaded {cache_data['count']} instruments in {elapsed:.2f}ms")
-        print(f"   Source: {'Memory' if stats['memory_cache_active'] else 'File'}")
-    else:
-        print("No cache available - would fetch from API")
-    
-    # Test 2: Memory cache lookups (should be very fast)
-    print("\n🔍 Test 2: Memory Cache Lookups (O(1) Dictionary Access)")
-    print("-" * 70)
-    
+    file_load_ms = (time.perf_counter() - start) * 1000
+
+    assert cache_data is not None
+    assert cache_data["count"] == 400
+    assert file_load_ms < 3000
+
+    test_symbols = [
+        "MERV - XMEV - STK0001 - 24hs",
+        "MERV - XMEV - STK0003 - 24hs",
+        "MERV - XMEV - GFGV70000O - 24hs",
+        "MERV - XMEV - GFGV70002O - 24hs",
+        "MERV - XMEV - STK0005 - 24hs",
+    ]
+
+    start = time.perf_counter()
     for symbol in test_symbols:
-        start = time.perf_counter()
         instrument = cache.get_instrument_by_symbol(symbol)
-        elapsed = (time.perf_counter() - start) * 1000000  # microseconds
-        
-        if instrument:
-            is_option = cache.is_option_symbol(symbol)
-            option_str = "📊 OPTION" if is_option else "💼 SECURITY"
-            print(f"   {option_str} | {symbol[:40]:40} | {elapsed:.2f}μs")
-        else:
-            print(f"   ❌ NOT FOUND | {symbol[:40]:40} | {elapsed:.2f}μs")
-    
-    # Test 3: Batch lookups (simulate WebSocket processing)
-    print("\n🔍 Test 3: Batch Processing (1000 lookups)")
-    print("-" * 70)
-    
+        assert instrument is not None
+    per_symbol_lookup_us = ((time.perf_counter() - start) * 1_000_000) / len(test_symbols)
+    assert per_symbol_lookup_us < 10_000
+
     start = time.perf_counter()
     for _ in range(1000):
         for symbol in test_symbols:
             cache.is_option_symbol(symbol)
-    elapsed = (time.perf_counter() - start) * 1000
-    
-    total_lookups = 1000 * len(test_symbols)
-    avg_per_lookup = (elapsed / total_lookups) * 1000  # microseconds
-    
-    print(f"✅ {total_lookups:,} lookups in {elapsed:.2f}ms")
-    print(f"   Average per lookup: {avg_per_lookup:.3f}μs")
-    print(f"   Throughput: {total_lookups / (elapsed/1000):,.0f} lookups/second")
-    
-    # Test 4: Options filtering
-    print("\n🔍 Test 4: Get All Options Symbols")
-    print("-" * 70)
-    
+    batch_ms = (time.perf_counter() - start) * 1000
+    assert batch_ms < 5000
+
     start = time.perf_counter()
     options_symbols = cache.get_options_symbols()
-    elapsed = (time.perf_counter() - start) * 1000
-    
-    print(f"✅ Retrieved {len(options_symbols):,} option symbols in {elapsed:.2f}ms")
-    
-    # Show sample options
-    sample_options = list(options_symbols)[:5]
-    print(f"\n   Sample options:")
-    for opt in sample_options:
-        print(f"      • {opt}")
-    
-    # Final statistics
-    print("\n📊 Final Cache Statistics:")
-    print("-" * 70)
-    stats = cache.get_cache_stats()
-    for key, value in stats.items():
-        print(f"   {key}: {value}")
-    
-    # Performance summary
-    print("\n" + "=" * 70)
-    print("PERFORMANCE SUMMARY")
-    print("=" * 70)
-    print(f"✅ Memory cache active: {stats['memory_cache_active']}")
-    print(f"✅ Total instruments cached: {stats['total_instruments']:,}")
-    print(f"✅ Total options cached: {stats['total_options']:,}")
-    print(f"✅ Lookup structures built: {stats['lookup_structures_built']}")
-    
-    if stats['memory_cache_valid']:
-        print(f"✅ Cache age: {stats.get('memory_cache_age_minutes', 0):.2f} minutes")
-    
-    print("\n🚀 Cache is optimized for maximum performance!")
-    print("=" * 70)
+    options_ms = (time.perf_counter() - start) * 1000
+
+    assert len(options_symbols) == 200
+    assert options_ms < 1000
 
 
 if __name__ == "__main__":
-    test_cache_performance()
+    test_cache_performance(Path(".pytest-cache"))

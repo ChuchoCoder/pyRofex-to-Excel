@@ -2,7 +2,7 @@
 
 ## Overview
 
-The EPGB Options application supports automatic synchronization of filled and partially-filled orders (trades) from the broker API to an Excel sheet. This feature can operate in two modes: **Periodic Sync** (default) or **Real-time Sync**.
+The pyRofex-To-Excel application supports automatic synchronization of filled and partially-filled orders (trades) from the broker API to an Excel sheet. This feature can operate in two modes: **Periodic Sync** (default) or **Real-time Sync**.
 
 ## Configuration Variables
 

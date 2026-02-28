@@ -3,8 +3,6 @@
 
 import os
 import sys
-import time
-import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -84,15 +82,14 @@ except ImportError as e:
 
 try:
     import pandas as pd
-    log_test_result("pandas import", True, "pandas library available") 
+    log_test_result("pandas import", True, f"pandas {pd.__version__} library available") 
 except ImportError as e:
     log_test_result("pandas import", False, f"Import failed: {e}", "Run: pip install pandas")
 
 # Step 2: Excel File Availability Test
 print("\n🔍 Step 2: Excel File Availability Test")
-import os
 
-excel_file = 'EPGB OC-DI - Python.xlsb'
+excel_file = 'pyRofex-Market-Data.xlsb'
 if os.path.exists(excel_file):
     log_test_result("Excel file exists", True, f"Found {excel_file}")
     
@@ -285,8 +282,8 @@ for invalid_data, description in invalid_data_tests:
 # Step 7: Excel Module Integration Test
 print("\n🔍 Step 7: Excel Module Integration Test")
 try:
-    from src.epgb_options.excel.symbol_loader import SymbolLoader
-    from src.epgb_options.excel.workbook_manager import WorkbookManager
+    from src.pyRofex_To_Excel.excel.symbol_loader import SymbolLoader
+    from src.pyRofex_To_Excel.excel.workbook_manager import WorkbookManager
 
     # Check key classes exist and have required methods
     assert hasattr(WorkbookManager, 'connect'), "WorkbookManager missing connect"
@@ -303,8 +300,8 @@ except Exception as e:
 # Step 8: Market Data Module Integration Test
 print("\n🔍 Step 8: Market Data Module Integration Test")
 try:
-    from src.epgb_options.market_data.api_client import pyRofexClient
-    from src.epgb_options.market_data.websocket_handler import WebSocketHandler
+    from src.pyRofex_To_Excel.market_data.api_client import pyRofexClient
+    from src.pyRofex_To_Excel.market_data.websocket_handler import WebSocketHandler
 
     # Check key classes exist and have required methods
     assert hasattr(pyRofexClient, 'initialize'), "pyRofexClient missing initialize"
