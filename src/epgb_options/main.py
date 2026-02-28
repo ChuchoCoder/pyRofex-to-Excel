@@ -1,5 +1,5 @@
 """
-Punto de entrada principal de la aplicación EPGB Options.
+Punto de entrada principal de la aplicación pyRofex-To-Excel.
 
 Este módulo provee la lógica principal de la aplicación y coordina
 todos los diferentes componentes.
@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 
 
 class EPGBOptionsApp:
-    """Clase principal de la aplicación EPGB Options."""
+    """Clase principal de la aplicación pyRofex-To-Excel."""
     
     def __init__(self):
         """Inicializar la aplicación."""
@@ -83,7 +83,7 @@ class EPGBOptionsApp:
             bool: True si la inicialización fue exitosa, False en caso contrario
         """
         try:
-            logger.info("Inicializando aplicación EPGB Options")
+            logger.info("Inicializando aplicación pyRofex-To-Excel")
             
             # Configurar logging
             setup_logging()
@@ -747,7 +747,7 @@ class EPGBOptionsApp:
     def run(self):
         """Ejecutar el bucle principal de la aplicación."""
         try:
-            logger.info("🚀 Iniciando aplicación de Datos de Mercado EPGB Options")
+            logger.info("🚀 Iniciando aplicación de Datos de Mercado pyRofex-To-Excel")
             
             if not self.initialize():
                 print("\n" + "="*70)
@@ -762,7 +762,7 @@ class EPGBOptionsApp:
                 print("\n🔧 Una vez que corrijas el problema, ejecutá la aplicación de nuevo:")
                 print("   python -m epgb_options")
                 print("   # o")
-                print("   epgb-options")
+                print("   pyrofex-to-excel")
                 print("="*70 + "\n")
                 
                 logger.error("🛑 Fallo de inicialización - deteniendo aplicación")

@@ -1,4 +1,4 @@
-# EPGB Options - Improved Project Structure
+# pyRofex-To-Excel - Improved Project Structure
 
 ## 🎯 Current Issues
 - **main_HM.py** (899 lines) - Monolithic file with mixed responsibilities
@@ -13,9 +13,7 @@
 EPGB_pyRofex/
 ├── pyproject.toml              # Modern project configuration
 ├── README.md                   # Project documentation
-├── requirements.txt            # Dependencies
-├── requirements-dev.txt        # Dev dependencies
-├── setup.py                   # Setup script
+├── setup.py                   # Legacy setup script (optional)
 ├── Makefile                   # Build commands
 ├── setup.ps1                  # Windows setup script
 │

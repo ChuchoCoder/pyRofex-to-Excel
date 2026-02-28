@@ -1,5 +1,5 @@
 """
-Administrador de libros de Excel para EPGB Options.
+Administrador de libros de Excel para pyRofex-To-Excel.
 
 Este módulo maneja las conexiones y administración de libros de Excel.
 """

@@ -1,4 +1,4 @@
-# EPGB_pyRofex
+# pyRofex-To-Excel
 
 [![CI](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/ci.yml)
 [![Package Release](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/package-release.yml/badge.svg)](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/package-release.yml)
@@ -80,6 +80,12 @@ Notas de operación:
 .\setup.ps1 run
 ```
 
+También podés ejecutar por comando CLI del paquete:
+
+```bash
+pyrofex-to-excel
+```
+
 ## 📌 Qué hace la app
 
 - Suscribe instrumentos de `Tickers` contra pyRofex.
@@ -130,7 +136,7 @@ python tools/validate_quickstart.py
 Sí. El proyecto ya está prácticamente listo para publicarse porque:
 - tiene `pyproject.toml`
 - define metadata de proyecto
-- expone entrypoint CLI (`epgb-options`)
+- expone entrypoint CLI (`pyrofex-to-excel`)
 
 Solo falta ejecutar el flujo de build + publicación (ver guía en [docs/PUBLICACION_PYPI.md](docs/PUBLICACION_PYPI.md)).
 

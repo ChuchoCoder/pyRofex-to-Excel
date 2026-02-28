@@ -1,5 +1,5 @@
 """
-Utilidades de validación para EPGB Options.
+Utilidades de validación para pyRofex-To-Excel.
 
 Este módulo provee funciones de validación de datos para datos de mercado,
 símbolos, y otros datos de la aplicación.

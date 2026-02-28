@@ -1,5 +1,5 @@
 """
-Utilidades de logging para EPGB Options.
+Utilidades de logging para pyRofex-To-Excel.
 
 Este módulo provee configuración centralizada de logging y utilidades.
 """

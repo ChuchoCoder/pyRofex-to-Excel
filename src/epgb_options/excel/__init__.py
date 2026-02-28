@@ -1,5 +1,5 @@
 """
-Módulo de operaciones de Excel para EPGB Options.
+Módulo de operaciones de Excel para pyRofex-To-Excel.
 
 Este módulo maneja todas las operaciones de archivos Excel incluyendo gestión de libros,
 operaciones de hojas y carga de símbolos.

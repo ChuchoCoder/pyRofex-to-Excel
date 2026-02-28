@@ -1,5 +1,5 @@
 """
-Test configuration for EPGB Options.
+Test configuration for pyRofex-To-Excel.
 """
 
 import pytest

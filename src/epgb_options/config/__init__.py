@@ -1,5 +1,5 @@
 """
-Módulo de gestión de configuración para EPGB Options.
+Módulo de gestión de configuración para pyRofex-To-Excel.
 
 Este módulo proporciona gestión centralizada de la configuración con
 soporte para variables de entorno usando python-dotenv.

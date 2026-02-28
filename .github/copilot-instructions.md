@@ -1,4 +1,4 @@
-# EPGB Options Development Guidelines
+# pyRofex-To-Excel Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2025-09-27
 

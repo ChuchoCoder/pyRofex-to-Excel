@@ -158,7 +158,7 @@ def main():
     
     if overall_success:
         print("\n🎉 New package structure is working correctly!")
-        print("✅ Ready for production use with epgb-options command")
+        print("✅ Ready for production use with pyrofex-to-excel command")
     else:
         print("\nSome tests failed - check the details above")
         print("💡 Most failures are expected during initial setup (credentials, etc.)")

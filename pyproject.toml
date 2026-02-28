@@ -3,12 +3,12 @@ requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "epgb-pyrofex"
+name = "pyrofex-to-excel"
 version = "1.1.1"
-description = "EPGB Options Market Data - Python market data fetcher with Excel integration"
+description = "pyRofex-To-Excel - Real-time market data to Excel"
 readme = "README.md"
 authors = [
-    {name = "EPGB Options", email = "developer@epgb.com"}
+    {name = "pyRofex-To-Excel", email = "developer@epgb.com"}
 ]
 requires-python = ">=3.9"
 
@@ -21,9 +21,16 @@ dependencies = [
     "python-dateutil>=2.8.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+
 # Entry points for command-line scripts
 [project.scripts]
-epgb-options = "epgb_options.main:main"
+pyrofex-to-excel = "epgb_options.main:main"
 
 # Setuptools configuration
 [tool.setuptools.packages.find]

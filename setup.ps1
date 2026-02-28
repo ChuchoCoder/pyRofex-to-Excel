@@ -1,4 +1,4 @@
-# EPGB Options Project PowerShell Setup Script
+# pyRofex-To-Excel Project PowerShell Setup Script
 # Provides convenient commands for common development tasks on Windows
 
 param(
@@ -8,14 +8,14 @@ param(
 )
 
 function Show-Help {
-    Write-Host "EPGB Options Project Commands" -ForegroundColor Cyan
+    Write-Host "pyRofex-To-Excel Project Commands" -ForegroundColor Cyan
     Write-Host "=============================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Setup Commands:" -ForegroundColor Yellow
     Write-Host "  .\setup.ps1 install     - Install package (editable) via pip"
-    Write-Host "  .\setup.ps1 install-dev - Install package + dev deps"
+    Write-Host "  .\setup.ps1 install-dev - Install package + dev extras from pyproject.toml"
     Write-Host "  .\setup.ps1 check       - Validate environment"
-    Write-Host "  .\setup.ps1 upgrade     - Upgrade dependencies from requirements files"
+    Write-Host "  .\setup.ps1 upgrade     - Upgrade pip tooling + reinstall package"
     Write-Host "  .\setup.ps1 clean       - Remove .venv virtual environment"
     Write-Host ""
     Write-Host "Development Commands:" -ForegroundColor Yellow
@@ -63,10 +63,7 @@ switch ($Command) {
     }
     
     "install-dev" { 
-        $editable = Invoke-Command-Safe "python -m pip install -e . --force-reinstall" "Installing package (editable)"
-        if ($editable) {
-            Invoke-Command-Safe "python -m pip install -r requirements-dev.txt" "Installing development dependencies"
-        }
+        Invoke-Command-Safe "python -m pip install -e \".[dev]\" --force-reinstall" "Installing package + dev extras"
     }
     
     "check" { 
@@ -74,9 +71,9 @@ switch ($Command) {
     }
     
     "upgrade" { 
-        $prodUpgrade = Invoke-Command-Safe "python -m pip install --upgrade -r requirements.txt" "Upgrading production dependencies"
-        if ($prodUpgrade -and (Test-Path "requirements-dev.txt")) {
-            Invoke-Command-Safe "python -m pip install --upgrade -r requirements-dev.txt" "Upgrading development dependencies"
+        $pipUpgrade = Invoke-Command-Safe "python -m pip install --upgrade pip setuptools wheel" "Upgrading packaging toolchain"
+        if ($pipUpgrade) {
+            Invoke-Command-Safe "python -m pip install -e \".[dev]\" --upgrade --force-reinstall" "Upgrading project dependencies via pyproject"
         }
     }
     
@@ -110,7 +107,7 @@ switch ($Command) {
     }
     
     "run" {
-        Write-Host "🚀 Running EPGB Options..." -ForegroundColor Blue
+        Write-Host "🚀 Running pyRofex-To-Excel..." -ForegroundColor Blue
         Invoke-Command-Safe "python -m epgb_options" "Running application"
     }
     
@@ -138,10 +135,8 @@ switch ($Command) {
     
     "dev-setup" {
         Write-Host "🔧 Setting up development environment..." -ForegroundColor Blue
-        $installResult = Invoke-Command-Safe "python -m pip install -e . --force-reinstall" "Installing package (editable)"
-        if ($installResult) {
-            $devDeps = Invoke-Command-Safe "python -m pip install -r requirements-dev.txt" "Installing development dependencies"
-        }
+        $installResult = Invoke-Command-Safe "python -m pip install -e \".[dev]\" --force-reinstall" "Installing package + dev extras"
+        $devDeps = $installResult
         
         if ($installResult -and $devDeps) {
             Write-Host "🔧 Setting up pre-commit hooks..." -ForegroundColor Blue

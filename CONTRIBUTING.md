@@ -1,4 +1,4 @@
-# Contributing to EPGB Options Market Data
+# Contributing to pyRofex-To-Excel
 
 Thank you for your interest in contributing to this project! This guide covers development setup, architecture, and best practices.
 
@@ -40,20 +40,17 @@ python -m venv .venv
 # Linux/Mac:
 source .venv/bin/activate
 
-# Install development dependencies
-pip install -r requirements-dev.txt
+# Install project + dev extras from pyproject.toml
+pip install -e ".[dev]"
 ```
 
 ## 📦 Dependency Management
 
-This project uses modern Python dependency management with multiple options:
+This project uses modern Python dependency management via `pyproject.toml`:
 
 ### Files Overview
 
 - **`pyproject.toml`** - Modern Python project configuration (PEP 518/621)
-- **`requirements.txt`** - Core production dependencies
-- **`requirements-dev.txt`** - Development dependencies
-- **`setup.py`** - Automated setup script with multiple modes
 - **`setup.ps1`** - PowerShell setup script for Windows users
 - **`Makefile`** - Unix-style command shortcuts
 
@@ -87,14 +84,6 @@ mypy src/epgb_options      # Type check
 pytest                     # (When tests added)
 ```
 
-### (Legacy) setup.py helpers
-Retained temporarily; will be removed in a future cleanup.
-
-```bash
-python setup.py --check
-python setup.py --dev
-```
-
 ### PowerShell Convenience (Optional)
 
 ```powershell
@@ -120,10 +109,7 @@ make quality                # Run all quality checks
 ```text
 EPGB_pyRofex/
 ├── pyproject.toml          # Modern project configuration
-├── requirements.txt        # Core dependencies
-├── requirements-dev.txt    # Development dependencies
-├── setup.py.backup        # (Legacy) transitional script (avoid)
-├── setup.ps1              # (Optional) legacy helper
+├── setup.ps1              # PowerShell helper commands
 ├── Makefile               # Unix command shortcuts
 │
 ├── src/epgb_options/      # Main application package
@@ -181,7 +167,7 @@ EPGB_pyRofex/
 
 The project includes pre-configured debug configurations in `.vscode/launch.json`:
 
-1. **Python: EPGB Options (Main)** - Debug the main application (looks for `.env` in root)
+1. **Python: pyRofex-To-Excel (Main)** - Debug the main application (looks for `.env` in root)
 2. **Python: Validation Script** - Debug the validation tool
 3. **Python: Create Configs** - Debug config generation
 
@@ -190,7 +176,7 @@ The project includes pre-configured debug configurations in `.vscode/launch.json
 1. Open the project in VS Code
 2. Set breakpoints in your code (click left of line numbers)
 3. Press `F5` or go to Run → Start Debugging
-4. Select "Python: EPGB Options (Main)" from the dropdown
+4. Select "Python: pyRofex-To-Excel (Main)" from the dropdown
 
 **Debug Features:**
 
@@ -235,7 +221,7 @@ python tools/validate_system.py
 Validates:
 
 - ✅ Imports & package structure
-- ✅ Entry point availability (`epgb-options`)
+- ✅ Entry point availability (`pyrofex-to-excel`)
 - ✅ Config modules + environment template presence
 
 ## 🎯 Development Workflow
@@ -262,7 +248,7 @@ ruff format .
 mypy src/epgb_options
 
 # 6. Test your changes
-epgb-options
+pyrofex-to-excel
 
 # 7. Commit
 git add .
@@ -328,7 +314,7 @@ This will automatically run:
 3. **Upgrade dependencies:**
 
    ```bash
-   python setup.py --upgrade
+   .\setup.ps1 upgrade
    ```
 
 ## 🤝 Contributing Guidelines
@@ -362,7 +348,7 @@ This will automatically run:
 5. **Test your changes:**
 
    ```bash
-   epgb-options
+   pyrofex-to-excel
    python tools/validate_system.py
    ```
 

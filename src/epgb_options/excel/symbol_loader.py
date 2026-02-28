@@ -1,5 +1,5 @@
 """
-Cargador de símbolos para EPGB Options.
+Cargador de símbolos para pyRofex-To-Excel.
 
 Este módulo carga símbolos             # Procesar datos de opciones
             if isinstance(options_data, list):

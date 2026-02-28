@@ -1,5 +1,5 @@
 """
-Utilidad de logging progresivo para EPGB Options.
+Utilidad de logging progresivo para pyRofex-To-Excel.
 
 Este módulo provee funcionalidad para actualizar logs en la misma línea
 (usando carriage return) y generar resúmenes periódicos, reduciendo

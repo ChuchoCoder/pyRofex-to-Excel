@@ -1,5 +1,5 @@
 """
-First-run bootstrap helpers for EPGB Options.
+First-run bootstrap helpers for pyRofex-To-Excel.
 
 This module handles:
 - Interactive prompting of required pyRofex configuration on first run.

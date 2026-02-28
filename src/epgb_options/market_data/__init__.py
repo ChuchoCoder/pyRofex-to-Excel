@@ -1,5 +1,5 @@
 """
-Módulo de operaciones de datos de mercado para EPGB Options.
+Módulo de operaciones de datos de mercado para pyRofex-To-Excel.
 
 Este módulo maneja todas las operaciones de datos de mercado incluyendo cliente API,
 conexiones WebSocket y procesamiento de datos.

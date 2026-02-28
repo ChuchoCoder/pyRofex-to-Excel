@@ -7,7 +7,7 @@ Sí, esta app se puede publicar como paquete pip.
 El proyecto ya cuenta con lo esencial para empaquetado:
 - `pyproject.toml` con metadata y dependencias
 - build backend `setuptools`
-- entrypoint CLI: `epgb-options`
+- entrypoint CLI: `pyrofex-to-excel`
 - layout `src/` compatible
 
 ## Recomendación de release
@@ -29,7 +29,7 @@ python -m twine upload --repository testpypi dist/*
 3. Probar instalación desde TestPyPI
 
 ```bash
-python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple epgb-pyrofex
+python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple pyrofex-to-excel
 ```
 
 4. Publicar en PyPI
@@ -66,7 +66,7 @@ Secrets esperados por el workflow de release:
 - [ ] Incrementar versión en `pyproject.toml`
 - [ ] Verificar README renderiza bien en PyPI (`twine check`)
 - [ ] Probar instalación limpia en venv nuevo
-- [ ] Confirmar comandos `epgb-options` y `python -m epgb_options` funcionan
+- [ ] Confirmar comandos `pyrofex-to-excel` y `python -m epgb_options` funcionan
 - [ ] Confirmar dependencias nativas (Excel/xlwings) documentadas para usuarios Windows
 
 ## Limitación importante

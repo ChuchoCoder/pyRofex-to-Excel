@@ -1,5 +1,5 @@
 """
-Utilidades auxiliares generales para EPGB Options.
+Utilidades auxiliares generales para pyRofex-To-Excel.
 
 Este módulo provee funciones de utilidad general usadas en toda la aplicación.
 """

@@ -1,4 +1,4 @@
-# Funcionalidades nuevas de EPGB_pyRofex
+# Funcionalidades nuevas de pyRofex-To-Excel
 
 Este documento resume las mejoras recientes de la app para operación diaria.
 

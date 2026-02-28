@@ -1,5 +1,5 @@
 """
-Manejador de WebSocket para EPGB Options.
+Manejador de WebSocket para pyRofex-To-Excel.
 
 Este módulo maneja conexiones de WebSocket, procesamiento de mensajes y manejo de errores
 para datos de mercado en tiempo real desde pyRofex.
