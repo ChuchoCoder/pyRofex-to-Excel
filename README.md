@@ -1,7 +1,7 @@
 # pyRofex-To-Excel
 
-[![CI](https://github.com/ChuchoCoder/pyRofex_To_Excel/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuchoCoder/pyRofex_To_Excel/actions/workflows/ci.yml)
-[![Package Release](https://github.com/ChuchoCoder/pyRofex_To_Excel/actions/workflows/package-release.yml/badge.svg)](https://github.com/ChuchoCoder/pyRofex_To_Excel/actions/workflows/package-release.yml)
+[![CI](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/ci.yml)
+[![Package Release](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/package-release.yml/badge.svg)](https://github.com/ChuchoCoder/EPGB_pyRofex/actions/workflows/package-release.yml)
 
 Aplicación Python para obtener datos de mercado en tiempo real desde pyRofex y volcarlos a Excel.
 
