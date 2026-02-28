@@ -1,12 +1,8 @@
 # T020: End-to-End System Validation Script
 # Comprehensive testing of the complete PyRofex integration system
 
-import queue
 import sys
-import threading
-import time
-import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 # Test configuration
@@ -59,8 +55,21 @@ def main():
         from src.pyRofex_To_Excel.excel import workbook_manager
         from src.pyRofex_To_Excel.market_data import api_client
         from src.pyRofex_To_Excel.utils import logging as utils_logging
+
+        validated_imports = (
+            pd,
+            pyRofex,
+            xw,
+            load_dotenv,
+            main,
+            excel_config,
+            pyrofex_config,
+            workbook_manager,
+            api_client,
+            utils_logging,
+        )
         
-        log_validation_message("Package Imports", "All required modules imported successfully", True)
+        log_validation_message("Package Imports", f"All required modules imported successfully ({len(validated_imports)} modules)", True)
         VALIDATION_RESULTS['imports'] = True
     except ImportError as e:
         log_validation_message("Package Imports", f"Import error: {e}", False)

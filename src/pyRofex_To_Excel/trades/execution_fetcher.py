@@ -5,7 +5,7 @@ Fetches filled/partially-filled executions from pyRofex API.
 Supports both real-time WebSocket subscriptions and REST backfill.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from queue import Queue
 from typing import Callable, Dict, List, Optional
 

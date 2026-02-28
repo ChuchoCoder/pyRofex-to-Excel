@@ -5,7 +5,7 @@ Este módulo provee funciones de validación de datos para datos de mercado,
 símbolos, y otros datos de la aplicación.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import pandas as pd
 

@@ -5,7 +5,7 @@ Este módulo maneja lectura y escritura en hojas de Excel,
 incluyendo actualizaciones de datos y formato.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict
 
 import pandas as pd
 import xlwings as xw
@@ -839,25 +839,6 @@ class SheetOperations:
             if row_index is None:
                 logger.warning(f"Símbolo '{symbol}' no encontrado en la columna A de la hoja")
                 return
-            
-            # Define column mapping (adjust based on your Excel structure)
-            # Assuming: A=symbol, B=bid_size, C=bid, D=ask, E=ask_size, F=last, G=change, etc.
-            column_mapping = {
-                'bid_size': 'B',
-                'bid': 'C',
-                'ask': 'D',
-                'ask_size': 'E',
-                'last': 'F',
-                'change': 'G',
-                'open': 'H',
-                'high': 'I',
-                'low': 'J',
-                'previous_close': 'K',
-                'turnover': 'L',
-                'volume': 'M',
-                'operations': 'N',
-                'datetime': 'O'
-            }
             
             # Batch update: Prepare all values in one list for faster Excel write
             # Build row data for columns B through O (14 columns)

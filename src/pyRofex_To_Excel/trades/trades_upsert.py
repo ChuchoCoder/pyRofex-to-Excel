@@ -6,7 +6,6 @@ MUST use bulk range updates per Constitution II.
 """
 
 import warnings
-from datetime import datetime
 from typing import Dict
 
 import pandas as pd
@@ -57,7 +56,7 @@ class TradesUpserter:
             if not new_executions_df.index.is_unique:
                 if self.status_logger:
                     self.status_logger.finish()
-                logger.warning(f"Incoming executions DataFrame has duplicate index values - deduplicating")
+                logger.warning("Incoming executions DataFrame has duplicate index values - deduplicating")
                 new_executions_df = new_executions_df[~new_executions_df.index.duplicated(keep='first')]
                 logger.debug(f"After dedup: {len(new_executions_df)} unique executions to upsert")
             
@@ -377,7 +376,6 @@ class TradesUpserter:
             
             # Calculate range
             num_rows = len(data)
-            num_cols = len(TRADES_COLUMNS)
             last_col_letter = list(TRADES_COLUMNS.values())[-1]  # 'Q'
             end_row = num_rows + 1  # +1 for header row
             
@@ -439,7 +437,7 @@ class TradesUpserter:
             try:
                 first_row = sheet.range('A1').expand('right').value
                 if not first_row or (isinstance(first_row, list) and not first_row[0]):
-                    logger.info(f"Trades sheet exists but has no headers - initializing")
+                    logger.info("Trades sheet exists but has no headers - initializing")
                     self._create_headers(sheet)
             except Exception as e:
                 logger.warning(f"Could not verify headers: {e} - recreating")
@@ -487,6 +485,6 @@ class TradesUpserter:
                 last_col = list(TRADES_COLUMNS.values())[-1]
                 clear_range = f'A2:{last_col}{used_range.last_cell.row}'
                 self.sheet.range(clear_range).clear_contents()
-                logger.info(f"Cleared all trades data from sheet (kept headers)")
+                logger.info("Cleared all trades data from sheet (kept headers)")
         except Exception as e:
             logger.error(f"Error clearing trades: {e}", exc_info=True)

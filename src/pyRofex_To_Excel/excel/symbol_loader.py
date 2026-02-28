@@ -17,7 +17,7 @@ Este módulo carga símbolos             # Procesar datos de opciones
 y los transforma para compatibilidad con pyRofex.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Dict
 
 import pandas as pd
 import xlwings as xw

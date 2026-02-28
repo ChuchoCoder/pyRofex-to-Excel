@@ -9,8 +9,6 @@ Este test verifica que:
 
 import pandas as pd
 
-from pyRofex_To_Excel.excel.symbol_loader import SymbolLoader
-from pyRofex_To_Excel.market_data.websocket_handler import WebSocketHandler
 from pyRofex_To_Excel.utils.validation import (safe_float_conversion,
                                            safe_int_conversion)
 

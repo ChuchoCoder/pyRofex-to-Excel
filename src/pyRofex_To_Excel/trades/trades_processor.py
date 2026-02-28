@@ -4,7 +4,6 @@ Trades Processor Module
 Processes raw execution dicts into validated pandas DataFrame.
 """
 
-from datetime import datetime
 from typing import Dict, List
 
 import pandas as pd

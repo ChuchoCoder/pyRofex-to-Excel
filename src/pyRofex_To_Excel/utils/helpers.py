@@ -4,8 +4,8 @@ Utilidades auxiliares generales para pyRofex-To-Excel.
 Este módulo provee funciones de utilidad general usadas en toda la aplicación.
 """
 
-from datetime import date, datetime
-from typing import Any, Optional
+from datetime import datetime
+from typing import Any
 
 import numpy as np
 import pandas as pd

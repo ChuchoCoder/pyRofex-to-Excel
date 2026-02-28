@@ -5,8 +5,8 @@ Este módulo maneja la transformación, agregación y procesamiento de datos
 para datos de mercado recibidos desde pyRofex.
 """
 
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 import pandas as pd
 

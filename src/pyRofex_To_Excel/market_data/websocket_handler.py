@@ -10,9 +10,7 @@ from typing import Any, Callable, Dict, Optional
 
 import pandas as pd
 
-from ..utils.helpers import get_excel_safe_value
-from ..utils.logging import (get_logger, log_connection_event,
-                             log_market_data_event)
+from ..utils.logging import (get_logger, log_connection_event)
 from ..utils.progress_logger import ProgressLogger, SummaryLogger
 from ..utils.validation import (safe_float_conversion, safe_int_conversion,
                                 validate_market_data)

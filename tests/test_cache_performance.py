@@ -98,7 +98,7 @@ def test_cache_performance():
     
     # Show sample options
     sample_options = list(options_symbols)[:5]
-    print(f"\n   Sample options:")
+    print("\n   Sample options:")
     for opt in sample_options:
         print(f"      • {opt}")
     

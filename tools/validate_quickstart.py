@@ -3,8 +3,6 @@
 
 import os
 import sys
-import time
-import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -84,13 +82,12 @@ except ImportError as e:
 
 try:
     import pandas as pd
-    log_test_result("pandas import", True, "pandas library available") 
+    log_test_result("pandas import", True, f"pandas {pd.__version__} library available") 
 except ImportError as e:
     log_test_result("pandas import", False, f"Import failed: {e}", "Run: pip install pandas")
 
 # Step 2: Excel File Availability Test
 print("\n🔍 Step 2: Excel File Availability Test")
-import os
 
 excel_file = 'pyRofex-Market-Data.xlsb'
 if os.path.exists(excel_file):

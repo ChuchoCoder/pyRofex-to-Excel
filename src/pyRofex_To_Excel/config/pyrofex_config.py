@@ -27,7 +27,6 @@ valores PYROFEX_* en tu archivo .env y dejando los valores por defecto como plac
 """
 
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 

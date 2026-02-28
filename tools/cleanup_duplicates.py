@@ -15,10 +15,10 @@ from pathlib import Path
 src_path = Path(__file__).resolve().parents[1] / 'src'
 sys.path.insert(0, str(src_path))
 
-from pyRofex_To_Excel.config import EXCEL_FILE, EXCEL_PATH, EXCEL_SHEET_PRICES
-from pyRofex_To_Excel.excel import SheetOperations, WorkbookManager
-from pyRofex_To_Excel.market_data import pyRofexClient
-from pyRofex_To_Excel.utils import get_logger, setup_logging
+from pyRofex_To_Excel.config import EXCEL_FILE, EXCEL_PATH, EXCEL_SHEET_PRICES  # noqa: E402
+from pyRofex_To_Excel.excel import SheetOperations, WorkbookManager  # noqa: E402
+from pyRofex_To_Excel.market_data import pyRofexClient  # noqa: E402
+from pyRofex_To_Excel.utils import get_logger, setup_logging  # noqa: E402
 
 logger = get_logger(__name__)
 
