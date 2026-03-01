@@ -12,6 +12,7 @@ Si solo querés usar la app (sin clonar el repo), este es el camino más simple.
 1. Requisitos mínimos
    - Windows + Microsoft Excel instalado
    - Python 3.9 o superior
+   - Acceso a Matriz (Primary API) provisto por tu Broker/ALyC
 
 2. Instalar el paquete (rápido, sin `.venv`)
 
