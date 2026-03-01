@@ -51,6 +51,7 @@ El repositorio ahora tiene dos workflows:
 	- `pull_request` (`opened`, `synchronize`, `reopened`) publica en TestPyPI con versión `dev` automática.
 	- La lógica del workflow está externalizada en scripts versionados: `tools/ci/generate_testpypi_dev_version.py`, `tools/ci/build_testpypi_summary.py`, `tools/ci/extract_pypi_package_metadata.py` y `tools/ci/comment_testpypi_install.js`.
 	- `release.published` publica en PyPI.
+	- En PyPI se usa `skip-existing` para que un re-run no falle si el archivo ya existe.
 	- Manual (`workflow_dispatch`) permite elegir `testpypi` o `pypi`.
 	- Publica con `pypa/gh-action-pypi-publish` + OIDC (Trusted Publishing).
 	- En PRs desde forks no publica (seguridad), pero sí ejecuta build/checks.
@@ -72,6 +73,9 @@ Solo usar `twine upload` con token como fallback manual/local.
 - [ ] Confirmar dependencias nativas (Excel/xlwings) documentadas para usuarios Windows
 
 ## Limitación importante
+
+PyPI no permite reutilizar nombre+versión de archivos (`.whl`/`.tar.gz`).
+Si aparece `HTTP 400 File already exists`, la acción correcta para un nuevo release es incrementar `version` en `pyproject.toml` y volver a publicar.
 
 Aunque el paquete pueda instalarse con pip, la operación real requiere:
 - Windows
