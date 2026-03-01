@@ -216,8 +216,6 @@ jobs:
           RELEASE_COMMIT_SHA: ${{ needs.build.outputs.release_commit_sha }}
         with:
           script: |
-            const core = require('@actions/core');
-
             const tag = process.env.RELEASE_TAG;
             const version = process.env.RELEASE_VERSION;
             const targetCommit = process.env.RELEASE_COMMIT_SHA;
