@@ -118,7 +118,7 @@ credentials.json
 .env.local
 local_settings.py
 
-# pyRofex-To-Excel Configuration - Environment Variables
+# pyRofex-to-Excel Configuration - Environment Variables
 !.env.example
 .env
 .env.production

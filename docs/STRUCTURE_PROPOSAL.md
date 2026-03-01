@@ -1,4 +1,4 @@
-# pyRofex-To-Excel - Improved Project Structure
+# pyRofex-to-Excel - Improved Project Structure
 
 ## 🎯 Current Issues
 - **main_HM.py** (899 lines) - Monolithic file with mixed responsibilities

@@ -1,4 +1,4 @@
-# pyRofex-To-Excel
+# pyRofex-to-Excel
 
 [![CI](https://github.com/ChuchoCoder/pyRofex-to-Excel/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuchoCoder/pyRofex-to-Excel/actions/workflows/ci.yml)
 [![Package Release](https://github.com/ChuchoCoder/pyRofex-to-Excel/actions/workflows/package-release.yml/badge.svg)](https://github.com/ChuchoCoder/pyRofex-to-Excel/actions/workflows/package-release.yml)

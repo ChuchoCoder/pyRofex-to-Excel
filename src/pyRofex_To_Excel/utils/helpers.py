@@ -1,5 +1,5 @@
 """
-Utilidades auxiliares generales para pyRofex-To-Excel.
+Utilidades auxiliares generales para pyRofex-to-Excel.
 
 Este módulo provee funciones de utilidad general usadas en toda la aplicación.
 """

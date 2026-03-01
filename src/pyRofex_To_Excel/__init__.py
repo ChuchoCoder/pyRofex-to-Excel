@@ -1,5 +1,5 @@
 """
-pyRofex-To-Excel
+pyRofex-to-Excel
 
 Aplicación en Python para obtener y gestionar datos de mercado
 con integración a Excel usando la API de pyRofex.
@@ -13,7 +13,7 @@ try:
 except PackageNotFoundError:
 	__version__ = "unknown"
 
-__author__ = "pyRofex-To-Excel"
+__author__ = "pyRofex-to-Excel"
 __email__ = "your.email@domain.com"
 
 # Public API exports

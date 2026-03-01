@@ -1,4 +1,4 @@
-# Contributing to pyRofex-To-Excel
+# Contributing to pyRofex-to-Excel
 
 Thank you for your interest in contributing to this project! This guide covers development setup, architecture, and best practices.
 
@@ -17,8 +17,8 @@ Thank you for your interest in contributing to this project! This guide covers d
 
 ```bash
 # Clone the repository
-git clone https://github.com/ChuchoCoder/pyRofex_To_Excel.git
-cd pyRofex_To_Excel
+git clone https://github.com/ChuchoCoder/pyRofex-to-Excel.git
+cd pyRofex-to-Excel
 
 # Create & activate a virtual environment (Windows)
 python -m venv .venv
@@ -167,7 +167,7 @@ pyRofex_To_Excel/
 
 The project includes pre-configured debug configurations in `.vscode/launch.json`:
 
-1. **Python: pyRofex-To-Excel (Main)** - Debug the main application (looks for `.env` in root)
+1. **Python: pyRofex-to-Excel (Main)** - Debug the main application (looks for `.env` in root)
 2. **Python: Validation Script** - Debug the validation tool
 3. **Python: Create Configs** - Debug config generation
 
@@ -176,7 +176,7 @@ The project includes pre-configured debug configurations in `.vscode/launch.json
 1. Open the project in VS Code
 2. Set breakpoints in your code (click left of line numbers)
 3. Press `F5` or go to Run → Start Debugging
-4. Select "Python: pyRofex-To-Excel (Main)" from the dropdown
+4. Select "Python: pyRofex-to-Excel (Main)" from the dropdown
 
 **Debug Features:**
 

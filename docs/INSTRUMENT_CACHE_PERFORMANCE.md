@@ -71,7 +71,7 @@ This means:
 
 ## Performance Comparison
 
-For a typical pyRofex-To-Excel session with 365,000 instruments:
+For a typical pyRofex-to-Excel session with 365,000 instruments:
 
 | Operation | Before | After | Improvement |
 |-----------|--------|-------|-------------|

@@ -1,7 +1,7 @@
 """
 Script para limpiar símbolos duplicados en la hoja de Excel.
 
-Este script se conecta al archivo Excel de pyRofex-To-Excel y elimina
+Este script se conecta al archivo Excel de pyRofex-to-Excel y elimina
 cualquier fila duplicada en la hoja Prices.
 
 Uso:

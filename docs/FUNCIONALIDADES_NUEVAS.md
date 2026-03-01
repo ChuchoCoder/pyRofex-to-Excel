@@ -1,4 +1,4 @@
-# Funcionalidades nuevas de pyRofex-To-Excel
+# Funcionalidades nuevas de pyRofex-to-Excel
 
 Este documento resume las mejoras recientes de la app para operación diaria.
 

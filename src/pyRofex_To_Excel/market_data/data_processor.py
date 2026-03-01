@@ -1,5 +1,5 @@
 """
-Procesador de datos para pyRofex-To-Excel.
+Procesador de datos para pyRofex-to-Excel.
 
 Este módulo maneja la transformación, agregación y procesamiento de datos
 para datos de mercado recibidos desde pyRofex.

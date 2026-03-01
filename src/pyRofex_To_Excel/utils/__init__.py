@@ -1,5 +1,5 @@
 """
-Módulo de funciones utilitarias para pyRofex-To-Excel.
+Módulo de funciones utilitarias para pyRofex-to-Excel.
 
 Este módulo contiene utilidades compartidas para logging, validación
 y funciones helper generales.

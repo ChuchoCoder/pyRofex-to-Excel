@@ -1,5 +1,5 @@
 """
-Utilidades de logging para pyRofex-To-Excel.
+Utilidades de logging para pyRofex-to-Excel.
 
 Este módulo provee configuración centralizada de logging y utilidades.
 """

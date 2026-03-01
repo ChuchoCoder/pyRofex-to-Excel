@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pyrofex-to-excel"
 version = "1.1.4"
-description = "pyRofex-To-Excel - Real-time market data to Excel"
+description = "pyRofex-to-Excel - Real-time market data to Excel"
 readme = "README.md"
 authors = [
-    {name = "pyRofex-To-Excel", email = "developer@pyrofex-to-excel.dev"}
+    {name = "pyRofex-to-Excel", email = "developer@pyrofex-to-excel.dev"}
 ]
 requires-python = ">=3.9"
 

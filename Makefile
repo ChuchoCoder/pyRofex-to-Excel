@@ -1,11 +1,11 @@
-# pyRofex-To-Excel Project Makefile
+# pyRofex-to-Excel Project Makefile
 # Provides convenient commands for common development tasks
 
 .PHONY: help install install-dev check upgrade clean lint format type-check run test
 
 # Default target
 help:
-	@echo "pyRofex-To-Excel Project Commands"
+	@echo "pyRofex-to-Excel Project Commands"
 	@echo "============================="
 	@echo ""
 	@echo "Setup Commands:"
@@ -58,7 +58,7 @@ type-check:
 
 # Application commands
 run:
-	@echo "🚀 Running pyRofex-To-Excel..."
+	@echo "🚀 Running pyRofex-to-Excel..."
 	@pyrofex-to-excel
 
 config:

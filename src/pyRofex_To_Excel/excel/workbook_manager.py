@@ -1,5 +1,5 @@
 """
-Administrador de libros de Excel para pyRofex-To-Excel.
+Administrador de libros de Excel para pyRofex-to-Excel.
 
 Este módulo maneja las conexiones y administración de libros de Excel.
 """

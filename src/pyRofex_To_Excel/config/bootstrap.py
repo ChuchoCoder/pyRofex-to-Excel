@@ -1,5 +1,5 @@
 """
-First-run bootstrap helpers for pyRofex-To-Excel.
+First-run bootstrap helpers for pyRofex-to-Excel.
 
 This module handles:
 - Interactive prompting of required pyRofex configuration on first run.

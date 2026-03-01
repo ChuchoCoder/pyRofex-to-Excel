@@ -1,5 +1,5 @@
 """
-Caché de instrumentos para pyRofex-To-Excel.
+Caché de instrumentos para pyRofex-to-Excel.
 
 Este módulo maneja el almacenamiento en caché de instrumentos disponibles desde pyRofex
 con funcionalidad TTL (tiempo de vida).

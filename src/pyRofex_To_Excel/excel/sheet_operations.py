@@ -1,5 +1,5 @@
 """
-Operaciones de hojas de Excel para pyRofex-To-Excel.
+Operaciones de hojas de Excel para pyRofex-to-Excel.
 
 Este módulo maneja lectura y escritura en hojas de Excel,
 incluyendo actualizaciones de datos y formato.

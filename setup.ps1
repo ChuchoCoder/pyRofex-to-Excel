@@ -1,4 +1,4 @@
-# pyRofex-To-Excel Project PowerShell Setup Script
+# pyRofex-to-Excel Project PowerShell Setup Script
 # Provides convenient commands for common development tasks on Windows
 
 param(
@@ -8,7 +8,7 @@ param(
 )
 
 function Show-Help {
-    Write-Host "pyRofex-To-Excel Project Commands" -ForegroundColor Cyan
+    Write-Host "pyRofex-to-Excel Project Commands" -ForegroundColor Cyan
     Write-Host "=============================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Setup Commands:" -ForegroundColor Yellow
@@ -107,7 +107,7 @@ switch ($Command) {
     }
     
     "run" {
-        Write-Host "🚀 Running pyRofex-To-Excel..." -ForegroundColor Blue
+        Write-Host "🚀 Running pyRofex-to-Excel..." -ForegroundColor Blue
         Invoke-Command-Safe "python -m pyRofex_To_Excel" "Running application"
     }
     

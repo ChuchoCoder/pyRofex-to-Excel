@@ -1,5 +1,5 @@
 """
-Punto de entrada principal de la aplicación pyRofex-To-Excel.
+Punto de entrada principal de la aplicación pyRofex-to-Excel.
 
 Este módulo provee la lógica principal de la aplicación y coordina
 todos los diferentes componentes.
@@ -35,7 +35,7 @@ def get_app_version() -> str:
 
 
 class PyRofexToExcelApp:
-    """Clase principal de la aplicación pyRofex-To-Excel."""
+    """Clase principal de la aplicación pyRofex-to-Excel."""
     
     def __init__(self):
         """Inicializar la aplicación."""
@@ -94,11 +94,11 @@ class PyRofexToExcelApp:
             bool: True si la inicialización fue exitosa, False en caso contrario
         """
         try:
-            logger.info("Inicializando aplicación pyRofex-To-Excel")
+            logger.info("Inicializando aplicación pyRofex-to-Excel")
             
             # Configurar logging
             setup_logging()
-            logger.info("Versión de pyRofex-To-Excel: %s", get_app_version())
+            logger.info("Versión de pyRofex-to-Excel: %s", get_app_version())
 
             # Bootstrap inicial: completar configuración requerida y preparar valores runtime
             if not run_first_time_bootstrap(force_reconfigure=force_reconfigure):
@@ -759,7 +759,7 @@ class PyRofexToExcelApp:
     def run(self, force_reconfigure: bool = False):
         """Ejecutar el bucle principal de la aplicación."""
         try:
-            logger.info("🚀 Iniciando aplicación de Datos de Mercado pyRofex-To-Excel")
+            logger.info("🚀 Iniciando aplicación de Datos de Mercado pyRofex-to-Excel")
             
             if not self.initialize(force_reconfigure=force_reconfigure):
                 print("\n" + "="*70)
@@ -919,7 +919,7 @@ def main():
     app_version = get_app_version()
 
     parser = argparse.ArgumentParser(
-        description="pyRofex-To-Excel: streaming de datos de mercado a Excel"
+        description="pyRofex-to-Excel: streaming de datos de mercado a Excel"
     )
     parser.add_argument(
         "--reconfigure",

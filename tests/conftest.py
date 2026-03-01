@@ -1,5 +1,5 @@
 """
-Test configuration for pyRofex-To-Excel.
+Test configuration for pyRofex-to-Excel.
 """
 
 import pytest
