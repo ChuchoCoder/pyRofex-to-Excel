@@ -66,8 +66,8 @@ Para guía completa sin clonar (actualización/desinstalación), ver [docs/INSTA
 Si vas a desarrollar en este proyecto:
 
 ```bash
-git clone https://github.com/ChuchoCoder/EPGB_pyRofex.git
-cd EPGB_pyRofex
+git clone https://github.com/ChuchoCoder/pyRofex-to-Excel.git
+cd pyRofex-to-Excel
 python -m venv .venv
 .venv\Scripts\activate
 pip install -e . --force-reinstall
