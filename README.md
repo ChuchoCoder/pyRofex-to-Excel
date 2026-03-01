@@ -25,6 +25,12 @@ python -m pip install --user pyrofex-to-excel
 pyrofex-to-excel
 ```
 
+Ver versión instalada:
+
+```bash
+pyrofex-to-excel --version
+```
+
 Alternativa equivalente:
 
 ```bash

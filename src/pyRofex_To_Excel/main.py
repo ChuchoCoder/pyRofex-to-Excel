@@ -8,6 +8,7 @@ todos los diferentes componentes.
 import argparse
 import time
 from datetime import datetime
+from importlib.metadata import PackageNotFoundError, version as package_version
 from typing import Any, Dict
 
 import pandas as pd
@@ -22,6 +23,15 @@ from .utils import get_logger, log_connection_event, setup_logging
 from .utils.progress_logger import ProgressLogger, SummaryLogger, format_number
 
 logger = get_logger(__name__)
+PACKAGE_DISTRIBUTION_NAME = "pyrofex-to-excel"
+
+
+def get_app_version() -> str:
+    """Obtener la versión instalada del paquete."""
+    try:
+        return package_version(PACKAGE_DISTRIBUTION_NAME)
+    except PackageNotFoundError:
+        return "unknown"
 
 
 class PyRofexToExcelApp:
@@ -88,6 +98,7 @@ class PyRofexToExcelApp:
             
             # Configurar logging
             setup_logging()
+            logger.info("Versión de pyRofex-To-Excel: %s", get_app_version())
 
             # Bootstrap inicial: completar configuración requerida y preparar valores runtime
             if not run_first_time_bootstrap(force_reconfigure=force_reconfigure):
@@ -905,6 +916,8 @@ class PyRofexToExcelApp:
 
 def main():
     """Punto de entrada principal para la aplicación."""
+    app_version = get_app_version()
+
     parser = argparse.ArgumentParser(
         description="pyRofex-To-Excel: streaming de datos de mercado a Excel"
     )
@@ -912,6 +925,12 @@ def main():
         "--reconfigure",
         action="store_true",
         help="vuelve a pedir PYROFEX_USER/PYROFEX_PASSWORD/PYROFEX_ACCOUNT y URLs de pyRofex",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {app_version}",
+        help="muestra la versión de la aplicación y termina",
     )
     args = parser.parse_args()
 
