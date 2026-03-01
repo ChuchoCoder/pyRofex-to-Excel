@@ -17,7 +17,7 @@ El proyecto ya cuenta con lo esencial para empaquetado:
 ```bash
 python -m pip install --upgrade build twine
 python -m build
-python -m twine check dist/*
+python -m twine check --strict dist/*
 ```
 
 2. Validar en TestPyPI (canal de testing)
@@ -45,10 +45,11 @@ El repositorio ahora tiene dos workflows:
 - CI (sin publicar): [.github/workflows/ci.yml](../.github/workflows/ci.yml)
 	- Se ejecuta en `pull_request` y `push`.
 	- Valida lint (si `ruff` está disponible), compilación (`compileall`) y build del paquete.
-	- Ejecuta `twine check` para validar metadatos/render de distribución.
+	- Ejecuta `twine check --strict` para validar metadatos/render de distribución.
 
 - Release de paquete: [.github/workflows/package-release.yml](../.github/workflows/package-release.yml)
 	- `pull_request` (`opened`, `synchronize`, `reopened`) publica en TestPyPI con versión `dev` automática.
+	- La lógica del workflow está externalizada en scripts versionados: `tools/ci/generate_testpypi_dev_version.py`, `tools/ci/build_testpypi_summary.py` y `tools/ci/comment_testpypi_install.js`.
 	- `release.published` publica en PyPI.
 	- Manual (`workflow_dispatch`) permite elegir `testpypi` o `pypi`.
 	- Publica con `pypa/gh-action-pypi-publish` + OIDC (Trusted Publishing).
@@ -65,7 +66,7 @@ Solo usar `twine upload` con token como fallback manual/local.
 ## Checklist previo recomendado
 
 - [ ] Incrementar versión en `pyproject.toml`
-- [ ] Verificar README renderiza bien en PyPI (`twine check`)
+- [ ] Verificar README renderiza bien en PyPI (`twine check --strict`)
 - [ ] Probar instalación limpia en venv nuevo
 - [ ] Confirmar comandos `pyrofex-to-excel` y `python -m pyRofex_To_Excel` funcionan
 - [ ] Confirmar dependencias nativas (Excel/xlwings) documentadas para usuarios Windows

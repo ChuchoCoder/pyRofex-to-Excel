@@ -52,53 +52,13 @@ jobs:
 
       - name: Generate TestPyPI dev version
         if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.repository == 'testpypi')
-        shell: bash
-        run: |
-          python - <<'PY'
-          import hashlib
-          import os
-          import pathlib
-          import re
-
-          pyproject = pathlib.Path("pyproject.toml")
-          content = pyproject.read_text(encoding="utf-8")
-          match = re.search(r'^version\s*=\s*"([^"]+)"', content, flags=re.MULTILINE)
-          if not match:
-              raise RuntimeError("No se encontró la versión en pyproject.toml")
-
-          base_version = match.group(1)
-          base_version = re.sub(r'(?i)(\.dev\d+|a\d+|b\d+|rc\d+|post\d+)$', '', base_version)
-
-          branch_name = os.environ.get("BRANCH_NAME", "unknown")
-          branch_slug = re.sub(r'[^a-z0-9]+', '-', branch_name.lower()).strip('-') or 'branch'
-          branch_hash = int(hashlib.sha256(branch_slug.encode("utf-8")).hexdigest()[:8], 16)
-
-          pr_number = int(os.environ.get("PR_NUMBER", "0"))
-          run_number = int(os.environ.get("GITHUB_RUN_NUMBER", "0"))
-
-          dev_number = f"{pr_number:04d}{run_number:06d}{branch_hash % 10000:04d}"
-          test_version = f"{base_version}.dev{dev_number}"
-
-          updated = re.sub(
-              r'^version\s*=\s*"[^"]+"',
-              f'version = "{test_version}"',
-              content,
-              count=1,
-              flags=re.MULTILINE,
-          )
-          pyproject.write_text(updated, encoding="utf-8")
-
-          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
-              env_file.write(f"TESTPYPI_VERSION={test_version}\n")
-
-          print(f"Generated TestPyPI version: {test_version}")
-          PY
+        run: python tools/ci/generate_testpypi_dev_version.py
 
       - name: Build package
         run: python -m build
 
       - name: Check distribution metadata
-        run: python -m twine check dist/*
+        run: python -m twine check --strict dist/*
 
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v4
@@ -116,6 +76,9 @@ jobs:
       pull-requests: write
       issues: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download dist artifacts
         uses: actions/download-artifact@v4
         with:
@@ -123,55 +86,7 @@ jobs:
           path: dist
 
       - name: Build TestPyPI install command summary
-        shell: bash
-        run: |
-          python - <<'PY'
-          import glob
-          import os
-          import pathlib
-          import re
-
-          wheels = sorted(glob.glob("dist/*.whl"))
-          if not wheels:
-              print("No wheel found in dist/; skipping summary generation")
-              raise SystemExit(0)
-
-          wheel = pathlib.Path(wheels[0]).name
-          match = re.match(r"^(?P<name>.+)-(?P<version>[^-]+)-[^-]+-[^-]+-[^-]+\.whl$", wheel)
-          if not match:
-              print(f"Could not parse wheel filename: {wheel}")
-              raise SystemExit(0)
-
-          package_name = match.group("name").replace("_", "-")
-          version = match.group("version")
-
-          summary = os.environ.get("GITHUB_STEP_SUMMARY")
-          if not summary:
-              raise SystemExit(0)
-
-            install_cmd = (
-              "pip install "
-              "--index-url https://test.pypi.org/simple/ "
-              "--extra-index-url https://pypi.org/simple/ "
-              f"{package_name}=={version}"
-            )
-          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
-              env_file.write(f"TESTPYPI_PACKAGE={package_name}\n")
-              env_file.write(f"TESTPYPI_VERSION={version}\n")
-              env_file.write(f"TESTPYPI_INSTALL_CMD={install_cmd}\n")
-
-          with open(summary, "a", encoding="utf-8") as f:
-              f.write("## 📦 TestPyPI Package\n")
-              f.write(f"- **Package:** `{package_name}`\n")
-              f.write(f"- **Version:** `{version}`\n")
-              f.write("- **Status:** ⏳ Publishing...\n")
-              f.write("- **Install command:**\n")
-              f.write("```bash\n")
-              f.write(f"{install_cmd}\n")
-              f.write("```\n")
-
-          print(f"Generated TestPyPI install command: {install_cmd}")
-          PY
+        run: python tools/ci/build_testpypi_summary.py
 
       - name: Publish to TestPyPI
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
@@ -208,45 +123,8 @@ jobs:
           TESTPYPI_INSTALL_CMD: ${{ env.TESTPYPI_INSTALL_CMD }}
         with:
           script: |
-            const marker = '<!-- testpypi-install-command -->';
-            const body = [
-              marker,
-              '### TestPyPI package listo para probar',
-              `- Package: \`${process.env.TESTPYPI_PACKAGE}\``,
-              `- Version: \`${process.env.TESTPYPI_VERSION}\``,
-              `- Install: \`${process.env.TESTPYPI_INSTALL_CMD}\``,
-            ].join('\n');
-
-            const issue_number = context.payload.pull_request.number;
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number,
-              per_page: 100,
-            });
-
-            const existing = comments.find(
-              (comment) =>
-                comment.user?.type === 'Bot' &&
-                comment.body &&
-                comment.body.includes(marker)
-            );
-
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number,
-                body,
-              });
-            }
+            const run = require('./tools/ci/comment_testpypi_install.js');
+            await run({ github, context });
 
   publish-pypi:
     runs-on: ubuntu-latest
