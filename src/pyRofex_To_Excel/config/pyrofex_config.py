@@ -27,16 +27,27 @@ valores PYROFEX_* en tu archivo .env y dejando los valores por defecto como plac
 """
 
 import os
+from typing import List
 
 from dotenv import load_dotenv
 
 # Load .env from project root
 load_dotenv()
 
+
+def _get_float_env(var_name: str, default: float) -> float:
+    """Obtener float desde env con fallback seguro."""
+    raw_value = os.getenv(var_name, str(default))
+    try:
+        return float(raw_value)
+    except (TypeError, ValueError):
+        return float(default)
+
 # Configuración de API de pyRofex - Las variables de entorno sobrescriben estos valores por defecto
 ENVIRONMENT = os.getenv('PYROFEX_ENVIRONMENT', 'LIVE')
 API_URL = os.getenv('PYROFEX_API_URL', 'https://api.cocos.xoms.com.ar/')
 WS_URL = os.getenv('PYROFEX_WS_URL', 'wss://api.cocos.xoms.com.ar/')
+CONNECTION_TIMEOUT_SECONDS = _get_float_env('PYROFEX_CONNECTION_TIMEOUT_SECONDS', 20.0)
 
 # CREDENCIALES - Reemplazá con valores reales o usá variables de entorno
 USER = os.getenv('PYROFEX_USER', 'REPLACE_WITH_YOUR_USERNAME')
@@ -44,12 +55,12 @@ PASSWORD = os.getenv('PYROFEX_PASSWORD', 'REPLACE_WITH_YOUR_PASSWORD')
 ACCOUNT = os.getenv('PYROFEX_ACCOUNT', 'REPLACE_WITH_YOUR_ACCOUNT')
 
 
-def validate_pyRofex_config():
+def validate_pyRofex_config() -> List[str]:
     """
     Validar valores de configuración de pyRofex.
     Devuelve lista de errores, lista vacía si todos son válidos.
     """
-    errors = []
+    errors: List[str] = []
     
     # Verificar que las URLs tengan el protocolo adecuado
     if not API_URL.startswith(('http://', 'https://')):
@@ -84,16 +95,30 @@ def validate_pyRofex_config():
     valid_environments = ['LIVE', 'REMARKET', 'DEMO']
     if ENVIRONMENT not in valid_environments:
         errors.append(f"ENVIRONMENT inválido: {ENVIRONMENT}. Se esperaba uno de: {', '.join(valid_environments)}")
+
+    # Verificar timeout de conexión
+    if CONNECTION_TIMEOUT_SECONDS <= 0:
+        errors.append(
+            f"PYROFEX_CONNECTION_TIMEOUT_SECONDS debe ser positivo, obtenido: {CONNECTION_TIMEOUT_SECONDS}"
+        )
+    elif CONNECTION_TIMEOUT_SECONDS < 3:
+        errors.append(
+            f"PYROFEX_CONNECTION_TIMEOUT_SECONDS demasiado bajo (mínimo recomendado: 3), obtenido: {CONNECTION_TIMEOUT_SECONDS}"
+        )
+    elif CONNECTION_TIMEOUT_SECONDS > 120:
+        errors.append(
+            f"PYROFEX_CONNECTION_TIMEOUT_SECONDS demasiado alto (máximo recomendado: 120), obtenido: {CONNECTION_TIMEOUT_SECONDS}"
+        )
     
     return errors
 
 
 if __name__ == "__main__":
     # Probar configuración cuando se ejecuta directamente
-    errors = validate_pyRofex_config()
-    if errors:
+    config_errors = validate_pyRofex_config()
+    if config_errors:
         print("❌ Errores de configuración de pyRofex:")
-        for error in errors:
+        for error in config_errors:
             print(f"  - {error}")
     else:
         print("✅ La configuración de pyRofex es válida")

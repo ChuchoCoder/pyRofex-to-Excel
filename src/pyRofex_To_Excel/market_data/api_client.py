@@ -4,12 +4,14 @@ Cliente API de pyRofex
 Este módulo maneja la conexión y configuración de la API de pyRofex.
 """
 
+import socket
 from typing import List, Set, Tuple
 
 import pyRofex
 
-from ..config.pyrofex_config import (ACCOUNT, API_URL, ENVIRONMENT, PASSWORD,
-                                     USER, WS_URL)
+from ..config.pyrofex_config import (ACCOUNT, API_URL,
+                                     CONNECTION_TIMEOUT_SECONDS, ENVIRONMENT,
+                                     PASSWORD, USER, WS_URL)
 from ..utils.logging import get_logger
 from .instrument_cache import InstrumentCache
 
@@ -34,10 +36,21 @@ class pyRofexClient:
             pyRofex._set_environment_parameter('ws', WS_URL, getattr(pyRofex.Environment, ENVIRONMENT))
             
             # Inicializar
-            pyRofex.initialize(environment=getattr(pyRofex.Environment, ENVIRONMENT),
-                             user=USER, 
-                             password=PASSWORD,
-                             account=ACCOUNT)
+            logger.info(
+                "Inicializando sesión pyRofex (timeout de conexión: %.1fs)",
+                CONNECTION_TIMEOUT_SECONDS,
+            )
+            previous_socket_timeout = socket.getdefaulttimeout()
+            socket.setdefaulttimeout(CONNECTION_TIMEOUT_SECONDS)
+            try:
+                pyRofex.initialize(
+                    environment=getattr(pyRofex.Environment, ENVIRONMENT),
+                    user=USER,
+                    password=PASSWORD,
+                    account=ACCOUNT,
+                )
+            finally:
+                socket.setdefaulttimeout(previous_socket_timeout)
             
             self.is_initialized = True
             logger.info(f"pyRofex inicializado con entorno: {ENVIRONMENT}")
@@ -88,7 +101,17 @@ class pyRofexClient:
             return False
 
         try:
-            instruments_response = pyRofex.get_detailed_instruments()
+            logger.info(
+                "Verificando conectividad con Matriz (timeout: %.1fs)",
+                CONNECTION_TIMEOUT_SECONDS,
+            )
+            previous_socket_timeout = socket.getdefaulttimeout()
+            socket.setdefaulttimeout(CONNECTION_TIMEOUT_SECONDS)
+            try:
+                instruments_response = pyRofex.get_detailed_instruments()
+            finally:
+                socket.setdefaulttimeout(previous_socket_timeout)
+
             if not instruments_response or 'instruments' not in instruments_response:
                 logger.error("Respuesta inválida al verificar conexión con Matriz")
                 return False

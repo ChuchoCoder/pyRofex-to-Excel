@@ -51,8 +51,9 @@ python -m pip install pyrofex-to-excel
 
 Qué pasa automáticamente en ese primer arranque:
 - Si faltan credenciales, la app te las pide por consola y las guarda en `.env`.
-- Si no existe workbook, crea uno nuevo (`.xlsx`) en la ruta configurada.
-- Crea y prepara hojas base: `Tickers`, `MarketData`, `Trades`, `Formulas`.
+- Si la autenticación/conexión a Matriz falla, la app corta la ejecución sin crear workbook ni sheets.
+- Si la conexión a Matriz es exitosa y no existe workbook, crea uno nuevo (`.xlsx`) en la ruta configurada.
+- Crea y prepara hojas base: `Tickers`, `MarketData`, `Trades`, `Formulas` (solo después de validar conexión).
 - Intenta poblar `Tickers` con instrumentos desde caché local.
 
 Si necesitás volver a ejecutar ese asistente (por ejemplo, usuario/clave incorrectos):
@@ -164,6 +165,7 @@ TRADES_BATCH_SIZE=500
 PYROFEX_ENVIRONMENT=LIVE
 PYROFEX_API_URL=https://api.cocos.xoms.com.ar/
 PYROFEX_WS_URL=wss://api.cocos.xoms.com.ar/
+PYROFEX_CONNECTION_TIMEOUT_SECONDS=20
 PYROFEX_USER=REPLACE_WITH_YOUR_USERNAME
 PYROFEX_PASSWORD=REPLACE_WITH_YOUR_PASSWORD
 PYROFEX_ACCOUNT=REPLACE_WITH_YOUR_ACCOUNT

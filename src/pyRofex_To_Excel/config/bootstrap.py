@@ -218,6 +218,9 @@ def refresh_runtime_config_modules():
     pyrofex_config.USER = os.getenv("PYROFEX_USER", pyrofex_config.USER)
     pyrofex_config.PASSWORD = os.getenv("PYROFEX_PASSWORD", pyrofex_config.PASSWORD)
     pyrofex_config.ACCOUNT = os.getenv("PYROFEX_ACCOUNT", pyrofex_config.ACCOUNT)
+    pyrofex_config.CONNECTION_TIMEOUT_SECONDS = float(
+        os.getenv("PYROFEX_CONNECTION_TIMEOUT_SECONDS", str(pyrofex_config.CONNECTION_TIMEOUT_SECONDS))
+    )
 
     try:
         from ..market_data import api_client as api_client_module
@@ -228,6 +231,7 @@ def refresh_runtime_config_modules():
         api_client_module.USER = pyrofex_config.USER
         api_client_module.PASSWORD = pyrofex_config.PASSWORD
         api_client_module.ACCOUNT = pyrofex_config.ACCOUNT
+        api_client_module.CONNECTION_TIMEOUT_SECONDS = pyrofex_config.CONNECTION_TIMEOUT_SECONDS
     except Exception as e:
         logger.debug(f"No se pudo refrescar constantes de api_client: {e}")
 

@@ -14,8 +14,9 @@ try:
                                TRADES_SYNC_ENABLED,
                                TRADES_SYNC_INTERVAL_SECONDS,
                                validate_excel_config)
-    from .pyrofex_config import (ACCOUNT, API_URL, ENVIRONMENT, PASSWORD, USER,
-                                 WS_URL, validate_pyRofex_config)
+    from .pyrofex_config import (ACCOUNT, API_URL, CONNECTION_TIMEOUT_SECONDS,
+                                 ENVIRONMENT, PASSWORD, USER, WS_URL,
+                                 validate_pyRofex_config)
     
     __all__ = [
         # Excel configuration
@@ -28,6 +29,7 @@ try:
         
         # pyRofex configuration  
         'ENVIRONMENT', 'API_URL', 'WS_URL', 'USER', 'PASSWORD', 'ACCOUNT',
+        'CONNECTION_TIMEOUT_SECONDS',
         'validate_pyRofex_config'
     ]
     
