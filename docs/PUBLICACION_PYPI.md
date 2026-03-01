@@ -35,8 +35,8 @@ python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-ur
 
 4. Publicar en PyPI (canal de usuarios finales)
 
-- Publicar un GitHub Release (`release.published`) con el tag/version final.
-- Alternativa manual: `workflow_dispatch` con `repository=pypi`.
+- Ejecutar `workflow_dispatch` con `repository=pypi` desde `main`.
+- El workflow hace bump automático de `version` en `pyproject.toml`, commitea, publica en PyPI y crea Tag + GitHub Release.
 
 ## Automatización con GitHub Actions
 
@@ -49,8 +49,9 @@ El repositorio ahora tiene dos workflows:
 
 - Release de paquete: [.github/workflows/package-release.yml](../.github/workflows/package-release.yml)
 	- `pull_request` (`opened`, `synchronize`, `reopened`) publica en TestPyPI con versión `dev` automática.
-	- La lógica del workflow está externalizada en scripts versionados: `tools/ci/generate_testpypi_dev_version.py`, `tools/ci/build_testpypi_summary.py`, `tools/ci/extract_pypi_package_metadata.py` y `tools/ci/comment_testpypi_install.js`.
-	- `release.published` publica en PyPI.
+	- La lógica del workflow está externalizada en scripts versionados: `tools/ci/bump_pyproject_version.py`, `tools/ci/generate_testpypi_dev_version.py`, `tools/ci/build_testpypi_summary.py`, `tools/ci/extract_pypi_package_metadata.py` y `tools/ci/comment_testpypi_install.js`.
+	- `workflow_dispatch` con `repository=pypi` publica en PyPI.
+	- Para PyPI, incrementa versión automáticamente (patch), commitea `pyproject.toml`, y crea Tag + GitHub Release.
 	- En PyPI se usa `skip-existing` para que un re-run no falle si el archivo ya existe.
 	- Manual (`workflow_dispatch`) permite elegir `testpypi` o `pypi`.
 	- Publica con `pypa/gh-action-pypi-publish` + OIDC (Trusted Publishing).
@@ -66,7 +67,7 @@ Solo usar `twine upload` con token como fallback manual/local.
 
 ## Checklist previo recomendado
 
-- [ ] Incrementar versión en `pyproject.toml`
+- [ ] Verificar branch `main` antes de ejecutar publish a PyPI
 - [ ] Verificar README renderiza bien en PyPI (`twine check --strict`)
 - [ ] Probar instalación limpia en venv nuevo
 - [ ] Confirmar comandos `pyrofex-to-excel` y `python -m pyRofex_To_Excel` funcionan
