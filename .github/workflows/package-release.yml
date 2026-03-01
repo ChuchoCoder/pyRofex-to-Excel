@@ -149,7 +149,12 @@ jobs:
           if not summary:
               raise SystemExit(0)
 
-          install_cmd = f"pip install -i https://test.pypi.org/simple/ {package_name}=={version}"
+            install_cmd = (
+              "pip install "
+              "--index-url https://test.pypi.org/simple/ "
+              "--extra-index-url https://pypi.org/simple/ "
+              f"{package_name}=={version}"
+            )
           with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
               env_file.write(f"TESTPYPI_PACKAGE={package_name}\n")
               env_file.write(f"TESTPYPI_VERSION={version}\n")
