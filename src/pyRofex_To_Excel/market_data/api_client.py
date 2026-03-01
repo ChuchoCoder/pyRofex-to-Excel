@@ -5,9 +5,13 @@ Este módulo maneja la conexión y configuración de la API de pyRofex.
 """
 
 import socket
-from typing import List, Set, Tuple
+import threading
+from contextlib import contextmanager
+from queue import Empty, Queue
+from typing import Any, Callable, Iterator, List, Set, Tuple
 
 import pyRofex
+from pyRofex.clients import rest_rfx as pyrofex_rest_rfx
 
 from ..config.pyrofex_config import (ACCOUNT, API_URL,
                                      CONNECTION_TIMEOUT_SECONDS, ENVIRONMENT,
@@ -16,6 +20,71 @@ from ..utils.logging import get_logger
 from .instrument_cache import InstrumentCache
 
 logger = get_logger(__name__)
+
+
+def _run_with_watchdog_timeout(
+    callable_fn: Callable[[], Any], timeout_seconds: float
+) -> Tuple[bool, Any, bool]:
+    """
+    Ejecutar una llamada potencialmente bloqueante con timeout duro.
+
+    Nota: usa hilo daemon para evitar que un bloqueo interno de librería
+    congele el flujo principal de la aplicación.
+
+    Returns:
+        Tuple[bool, object, bool]:
+            - success
+            - result u excepción
+            - timed_out
+    """
+    result_queue: Queue[Tuple[bool, Any]] = Queue(maxsize=1)
+
+    def _worker() -> None:
+        try:
+            result_queue.put((True, callable_fn()))
+        except Exception as e:
+            result_queue.put((False, e))
+
+    thread = threading.Thread(target=_worker, daemon=True)
+    thread.start()
+    thread.join(timeout_seconds)
+
+    if thread.is_alive():
+        return False, TimeoutError(f"Operación excedió timeout de {timeout_seconds:.1f}s"), True
+
+    try:
+        success, payload = result_queue.get_nowait()
+        return success, payload, False
+    except Empty:
+        return False, RuntimeError("La operación finalizó sin resultado"), False
+
+
+@contextmanager
+def _temporary_pyrofex_rest_timeout(timeout_seconds: float) -> Iterator[None]:
+    """
+    Inyectar timeout por defecto en requests internos de pyRofex.
+
+    pyRofex 0.5.0 no expone timeout configurable y usa requests.get/post
+    sin parámetro timeout en RestClient, lo que puede bloquear por largos
+    períodos según red/DNS/reintentos.
+    """
+    original_get = pyrofex_rest_rfx.requests.get
+    original_post = pyrofex_rest_rfx.requests.post
+
+    def _wrap_with_timeout(original_fn: Callable[..., Any]) -> Callable[..., Any]:
+        def _wrapped(*args: Any, **kwargs: Any) -> Any:
+            kwargs.setdefault("timeout", timeout_seconds)
+            return original_fn(*args, **kwargs)
+
+        return _wrapped
+
+    pyrofex_rest_rfx.requests.get = _wrap_with_timeout(original_get)
+    pyrofex_rest_rfx.requests.post = _wrap_with_timeout(original_post)
+    try:
+        yield
+    finally:
+        pyrofex_rest_rfx.requests.get = original_get
+        pyrofex_rest_rfx.requests.post = original_post
 
 
 class pyRofexClient:
@@ -43,14 +112,42 @@ class pyRofexClient:
             previous_socket_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(CONNECTION_TIMEOUT_SECONDS)
             try:
-                pyRofex.initialize(
-                    environment=getattr(pyRofex.Environment, ENVIRONMENT),
-                    user=USER,
-                    password=PASSWORD,
-                    account=ACCOUNT,
-                )
+                with _temporary_pyrofex_rest_timeout(CONNECTION_TIMEOUT_SECONDS):
+                    success, payload, timed_out = _run_with_watchdog_timeout(
+                        lambda: pyRofex.initialize(
+                            environment=getattr(pyRofex.Environment, ENVIRONMENT),
+                            user=USER,
+                            password=PASSWORD,
+                            account=ACCOUNT,
+                        ),
+                        CONNECTION_TIMEOUT_SECONDS,
+                    )
             finally:
                 socket.setdefaulttimeout(previous_socket_timeout)
+
+            if timed_out:
+                print("\n" + "="*70)
+                print("\033[91m⏱️ TIMEOUT DE CONEXIÓN\033[0m")
+                print("="*70)
+                print(
+                    f"\033[91mNo se pudo completar la autenticación con Matriz en {CONNECTION_TIMEOUT_SECONDS:.1f}s\033[0m"
+                )
+                print("\n📋 Qué pasó:")
+                print("   • La librería pyRofex quedó esperando respuesta de red/API")
+                print("   • La app abortó la inicialización para evitar quedar clavada")
+                print("\n🔧 Sugerencias:")
+                print("   1. Verificá conectividad de red/VPN y estado de Matriz")
+                print("   2. Probá aumentar PYROFEX_CONNECTION_TIMEOUT_SECONDS (ej: 30)")
+                print("   3. Reintentá ejecutar la app")
+                print("="*70 + "\n")
+                logger.error(
+                    "Timeout inicializando pyRofex tras %.1fs",
+                    CONNECTION_TIMEOUT_SECONDS,
+                )
+                return False
+
+            if not success:
+                raise payload
             
             self.is_initialized = True
             logger.info(f"pyRofex inicializado con entorno: {ENVIRONMENT}")
@@ -108,9 +205,25 @@ class pyRofexClient:
             previous_socket_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(CONNECTION_TIMEOUT_SECONDS)
             try:
-                instruments_response = pyRofex.get_detailed_instruments()
+                with _temporary_pyrofex_rest_timeout(CONNECTION_TIMEOUT_SECONDS):
+                    success, payload, timed_out = _run_with_watchdog_timeout(
+                        pyRofex.get_detailed_instruments,
+                        CONNECTION_TIMEOUT_SECONDS,
+                    )
             finally:
                 socket.setdefaulttimeout(previous_socket_timeout)
+
+            if timed_out:
+                logger.error(
+                    "Timeout verificando conectividad con Matriz tras %.1fs",
+                    CONNECTION_TIMEOUT_SECONDS,
+                )
+                return False
+
+            if not success:
+                raise payload
+
+            instruments_response = payload
 
             if not instruments_response or 'instruments' not in instruments_response:
                 logger.error("Respuesta inválida al verificar conexión con Matriz")
@@ -144,7 +257,23 @@ class pyRofexClient:
             
             # Obtener desde API
             logger.info("Obteniendo instrumentos disponibles desde la API de pyRofex...")
-            instrumentsResponse = pyRofex.get_detailed_instruments()
+            with _temporary_pyrofex_rest_timeout(CONNECTION_TIMEOUT_SECONDS):
+                success, payload, timed_out = _run_with_watchdog_timeout(
+                    pyRofex.get_detailed_instruments,
+                    CONNECTION_TIMEOUT_SECONDS,
+                )
+
+            if timed_out:
+                logger.error(
+                    "Timeout obteniendo instrumentos tras %.1fs",
+                    CONNECTION_TIMEOUT_SECONDS,
+                )
+                return set()
+
+            if not success:
+                raise payload
+
+            instrumentsResponse = payload
             
             if not instrumentsResponse:
                 logger.warning("No se devolvieron instrumentos desde la API")
