@@ -49,7 +49,7 @@ El repositorio ahora tiene dos workflows:
 
 - Release de paquete: [.github/workflows/package-release.yml](../.github/workflows/package-release.yml)
 	- `pull_request` (`opened`, `synchronize`, `reopened`) publica en TestPyPI con versión `dev` automática.
-	- La lógica del workflow está externalizada en scripts versionados: `tools/ci/generate_testpypi_dev_version.py`, `tools/ci/build_testpypi_summary.py` y `tools/ci/comment_testpypi_install.js`.
+	- La lógica del workflow está externalizada en scripts versionados: `tools/ci/generate_testpypi_dev_version.py`, `tools/ci/build_testpypi_summary.py`, `tools/ci/extract_pypi_package_metadata.py` y `tools/ci/comment_testpypi_install.js`.
 	- `release.published` publica en PyPI.
 	- Manual (`workflow_dispatch`) permite elegir `testpypi` o `pypi`.
 	- Publica con `pypa/gh-action-pypi-publish` + OIDC (Trusted Publishing).
