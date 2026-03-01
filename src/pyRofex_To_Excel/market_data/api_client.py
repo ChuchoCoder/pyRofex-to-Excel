@@ -11,6 +11,7 @@ from queue import Empty, Queue
 from typing import Any, Callable, Iterator, List, Set, Tuple
 
 import pyRofex
+import requests
 from pyRofex.clients import rest_rfx as pyrofex_rest_rfx
 
 from ..config.pyrofex_config import (ACCOUNT, API_URL,
@@ -20,6 +21,56 @@ from ..utils.logging import get_logger
 from .instrument_cache import InstrumentCache
 
 logger = get_logger(__name__)
+
+
+def _auth_url() -> str:
+    return API_URL.rstrip("/") + "/auth/getToken"
+
+
+def _request_auth_token(timeout_seconds: float) -> Tuple[bool, str, str]:
+    """
+    Pedir token de autenticación directamente a Matriz con timeout explícito.
+
+    Returns:
+        tuple[ok, token, reason]
+    """
+    user = USER.strip()
+    password = PASSWORD.strip()
+
+    headers = {
+        "X-Username": user,
+        "X-Password": password,
+    }
+
+    try:
+        response = requests.post(
+            _auth_url(),
+            headers=headers,
+            timeout=timeout_seconds,
+        )
+    except requests.exceptions.Timeout:
+        return False, "", f"Timeout al autenticar contra Matriz tras {timeout_seconds:.1f}s"
+    except requests.exceptions.ConnectionError as e:
+        return False, "", f"Error de conexión al autenticar contra Matriz: {e}"
+    except requests.exceptions.RequestException as e:
+        return False, "", f"Error HTTP al autenticar contra Matriz: {e}"
+
+    auth_token = response.headers.get("X-Auth-Token")
+
+    if response.status_code in (401, 403):
+        return False, "", "Credenciales rechazadas por Matriz (401/403)"
+
+    if not response.ok:
+        return (
+            False,
+            "",
+            f"Matriz respondió {response.status_code} durante autenticación (no es error de credenciales)",
+        )
+
+    if not auth_token:
+        return False, "", "Autenticación OK pero sin X-Auth-Token en la respuesta"
+
+    return True, auth_token, ""
 
 
 def _run_with_watchdog_timeout(
@@ -109,6 +160,33 @@ class pyRofexClient:
                 "Inicializando sesión pyRofex (timeout de conexión: %.1fs)",
                 CONNECTION_TIMEOUT_SECONDS,
             )
+
+            token_ok, auth_token, auth_reason = _request_auth_token(CONNECTION_TIMEOUT_SECONDS)
+            if not token_ok:
+                if "credenciales" in auth_reason.lower() or "401/403" in auth_reason:
+                    print("\n" + "="*70)
+                    print("\033[91m❌ FALLO DE AUTENTICACIÓN\033[0m")
+                    print("="*70)
+                    print("\033[91m🔐 PyRofex rechazó tus credenciales\033[0m")
+                    print(f"\nDetalles del error: {auth_reason}")
+                    print("\n📋 Qué pasó:")
+                    print("   • La API rechazó usuario/contraseña")
+                    print("   • Verificá que sean las credenciales de Matriz de tu ALyC")
+                    print("="*70 + "\n")
+                    logger.error("🔐 Fallo de autenticación: %s", auth_reason)
+                else:
+                    print("\n" + "="*70)
+                    print("\033[91m⏱️ FALLO DE CONECTIVIDAD/AUTH\033[0m")
+                    print("="*70)
+                    print("\033[91mNo se pudo completar autenticación con Matriz\033[0m")
+                    print(f"\nDetalles del error: {auth_reason}")
+                    print("\n📋 Qué pasó:")
+                    print("   • Este error NO indica necesariamente credenciales incorrectas")
+                    print("   • Puede ser timeout/red o indisponibilidad temporal del backend")
+                    print("="*70 + "\n")
+                    logger.error("Fallo de conectividad/autenticación Matriz: %s", auth_reason)
+                return False
+
             previous_socket_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(CONNECTION_TIMEOUT_SECONDS)
             try:
@@ -116,9 +194,10 @@ class pyRofexClient:
                     success, payload, timed_out = _run_with_watchdog_timeout(
                         lambda: pyRofex.initialize(
                             environment=getattr(pyRofex.Environment, ENVIRONMENT),
-                            user=USER,
-                            password=PASSWORD,
-                            account=ACCOUNT,
+                            user=USER.strip(),
+                            password=PASSWORD.strip(),
+                            account=ACCOUNT.strip(),
+                            active_token=auth_token,
                         ),
                         CONNECTION_TIMEOUT_SECONDS,
                     )
@@ -150,6 +229,7 @@ class pyRofexClient:
                 raise payload
             
             self.is_initialized = True
+            self.is_authenticated = True
             logger.info(f"pyRofex inicializado con entorno: {ENVIRONMENT}")
             return True
             
@@ -185,55 +265,21 @@ class pyRofexClient:
 
     def probe_matrix_connection(self) -> bool:
         """
-        Verificar conectividad efectiva con Matriz/pyRofex.
+        Verificar estado de autenticación con Matriz.
 
-        Realiza una llamada real a la API para confirmar que la sesión
-        autenticada puede alcanzar el backend remoto.
+        Esta verificación NO realiza llamadas adicionales a endpoints REST.
+        El criterio es que la autenticación (obtención de token) durante
+        initialize() haya sido exitosa.
 
         Returns:
-            bool: True si la conectividad está OK, False en caso contrario.
+            bool: True si la autenticación está OK, False en caso contrario.
         """
-        if not self.is_initialized:
-            logger.error("No se puede verificar conexión a Matriz: cliente no inicializado")
+        if not self.is_initialized or not self.is_authenticated:
+            logger.error("No se pudo verificar autenticación con Matriz: sesión no autenticada")
             return False
 
-        try:
-            logger.info(
-                "Verificando conectividad con Matriz (timeout: %.1fs)",
-                CONNECTION_TIMEOUT_SECONDS,
-            )
-            previous_socket_timeout = socket.getdefaulttimeout()
-            socket.setdefaulttimeout(CONNECTION_TIMEOUT_SECONDS)
-            try:
-                with _temporary_pyrofex_rest_timeout(CONNECTION_TIMEOUT_SECONDS):
-                    success, payload, timed_out = _run_with_watchdog_timeout(
-                        pyRofex.get_detailed_instruments,
-                        CONNECTION_TIMEOUT_SECONDS,
-                    )
-            finally:
-                socket.setdefaulttimeout(previous_socket_timeout)
-
-            if timed_out:
-                logger.error(
-                    "Timeout verificando conectividad con Matriz tras %.1fs",
-                    CONNECTION_TIMEOUT_SECONDS,
-                )
-                return False
-
-            if not success:
-                raise payload
-
-            instruments_response = payload
-
-            if not instruments_response or 'instruments' not in instruments_response:
-                logger.error("Respuesta inválida al verificar conexión con Matriz")
-                return False
-
-            logger.info("Conectividad con Matriz verificada correctamente")
-            return True
-        except Exception as e:
-            logger.error(f"Fallo al verificar conectividad con Matriz: {e}")
-            return False
+        logger.info("Autenticación con Matriz verificada correctamente (sin probe REST adicional)")
+        return True
     
     def fetch_available_instruments(self, force_refresh: bool = False) -> Set[str]:
         """
@@ -541,7 +587,6 @@ class pyRofexClient:
             else:
                 # pyRofex doesn't have get_all_orders, use custom HTTP request
                 logger.debug("Using custom HTTP request for filled orders endpoint")
-                import requests
 
                 # Access the auth token from pyRofex's environment config
                 try:
