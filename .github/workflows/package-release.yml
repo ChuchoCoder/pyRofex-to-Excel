@@ -137,7 +137,7 @@ jobs:
               raise SystemExit(0)
 
           wheel = pathlib.Path(wheels[0]).name
-            match = re.match(r"^(?P<name>[^-]+)-(?P<version>[^-]+)-", wheel)
+          match = re.match(r"^(?P<name>.+)-(?P<version>[^-]+)-[^-]+-[^-]+-[^-]+\.whl$", wheel)
           if not match:
               print(f"Could not parse wheel filename: {wheel}")
               raise SystemExit(0)
@@ -272,7 +272,7 @@ jobs:
               raise SystemExit(0)
 
           wheel = pathlib.Path(wheels[0]).name
-            match = re.match(r"^(?P<name>[^-]+)-(?P<version>[^-]+)-", wheel)
+            match = re.match(r"^(?P<name>.+)-(?P<version>[^-]+)-[^-]+-[^-]+-[^-]+\.whl$", wheel)
           if not match:
               print(f"Could not parse wheel filename: {wheel}")
               raise SystemExit(0)
