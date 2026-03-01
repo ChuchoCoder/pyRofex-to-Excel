@@ -10,7 +10,6 @@ This module handles:
 
 import os
 import sys
-from getpass import getpass
 from pathlib import Path
 from typing import Dict
 
@@ -36,11 +35,51 @@ def _env_file_path() -> Path:
     return _project_root() / ".env"
 
 
-def _is_missing_required(value: str) -> bool:
+def _is_missing_required(value: str | None) -> bool:
     if value is None:
         return True
     stripped = str(value).strip()
     return not stripped or stripped in _PLACEHOLDER_VALUES
+
+
+def _prompt_password_with_mask(prompt_text: str) -> str:
+    if os.name != "nt":
+        from getpass import getpass
+
+        return getpass(prompt_text)
+
+    import msvcrt
+
+    sys.stdout.write(prompt_text)
+    sys.stdout.flush()
+
+    chars = []
+
+    while True:
+        char = msvcrt.getwch()
+
+        if char in ("\r", "\n"):
+            sys.stdout.write("\n")
+            sys.stdout.flush()
+            return "".join(chars)
+
+        if char == "\003":
+            raise KeyboardInterrupt
+
+        if char in ("\x00", "\xe0"):
+            msvcrt.getwch()
+            continue
+
+        if char == "\b":
+            if chars:
+                chars.pop()
+                sys.stdout.write("\b \b")
+                sys.stdout.flush()
+            continue
+
+        chars.append(char)
+        sys.stdout.write("*")
+        sys.stdout.flush()
 
 
 def _prompt_value(key: str, current: str, default: str = "", secret: bool = False) -> str:
@@ -49,7 +88,7 @@ def _prompt_value(key: str, current: str, default: str = "", secret: bool = Fals
     while True:
         if secret:
             prompt_text = f"{key}{' (enter para mantener valor actual)' if current and current not in _PLACEHOLDER_VALUES else ''}: "
-            entered = getpass(prompt_text)
+            entered = _prompt_password_with_mask(prompt_text)
         else:
             if suggested:
                 entered = input(f"{key} [{suggested}]: ").strip()
@@ -193,7 +232,7 @@ def refresh_runtime_config_modules():
         logger.debug(f"No se pudo refrescar constantes de api_client: {e}")
 
 
-def run_first_time_bootstrap() -> bool:
+def run_first_time_bootstrap(force_reconfigure: bool = False) -> bool:
     """
     Run first-time bootstrap flow.
 
@@ -208,11 +247,17 @@ def run_first_time_bootstrap() -> bool:
 
     accumulated_updates: Dict[str, str] = {}
 
-    if required_missing:
+    if force_reconfigure or required_missing:
         if not sys.stdin or not sys.stdin.isatty():
-            logger.error("Faltan credenciales requeridas y el entorno no es interactivo para solicitarlas")
+            if force_reconfigure:
+                logger.error("Se solicitó reconfiguración, pero el entorno no es interactivo")
+            else:
+                logger.error("Faltan credenciales requeridas y el entorno no es interactivo para solicitarlas")
             logger.error("Configurá PYROFEX_USER, PYROFEX_PASSWORD y PYROFEX_ACCOUNT en .env")
             return False
+
+        if force_reconfigure:
+            logger.info("Reconfiguración solicitada: completá nuevamente los datos de pyRofex")
 
         prompted_values = _prompt_required_pyrofex_values(current)
         accumulated_updates.update(prompted_values)

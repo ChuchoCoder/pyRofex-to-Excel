@@ -47,6 +47,12 @@ Qué pasa automáticamente en ese primer arranque:
 - Crea y prepara hojas base: `Tickers`, `MarketData`, `Trades`, `Formulas`.
 - Intenta poblar `Tickers` con instrumentos desde caché local.
 
+Si necesitás volver a ejecutar ese asistente (por ejemplo, usuario/clave incorrectos):
+
+```bash
+pyrofex-to-excel --reconfigure
+```
+
 5. Verificar que está funcionando
 - Abrí el workbook generado.
 - Confirmá que existen las hojas `Tickers`, `MarketData`, `Trades` y `Formulas`.
@@ -93,6 +99,10 @@ Comportamiento importante:
 - Si presionás Enter y hay valor sugerido, se conserva.
 - Si no hay valor sugerido en campos requeridos, vuelve a preguntar.
 - Todo lo ingresado se persiste en `.env` automáticamente.
+
+Nota sobre contraseña:
+- En Windows, al escribir `PYROFEX_PASSWORD` se muestra `*` por cada carácter.
+- En otros sistemas, puede mostrarse como input oculto según el terminal.
 
 Ejemplo típico de consola:
 

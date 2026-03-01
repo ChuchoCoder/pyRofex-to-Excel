@@ -5,6 +5,7 @@ Este módulo provee la lógica principal de la aplicación y coordina
 todos los diferentes componentes.
 """
 
+import argparse
 import time
 from datetime import datetime
 from typing import Any, Dict
@@ -75,7 +76,7 @@ class PyRofexToExcelApp:
         # Summary logger for periodic stats (every 60s, less frequent)
         self._summary_logger = SummaryLogger(logger, interval_seconds=60.0)
     
-    def initialize(self) -> bool:
+    def initialize(self, force_reconfigure: bool = False) -> bool:
         """
         Inicializar todos los componentes de la aplicación.
         
@@ -89,7 +90,7 @@ class PyRofexToExcelApp:
             setup_logging()
 
             # Bootstrap inicial: completar configuración requerida y preparar valores runtime
-            if not run_first_time_bootstrap():
+            if not run_first_time_bootstrap(force_reconfigure=force_reconfigure):
                 return False
             
             # Validar configuraciones
@@ -744,12 +745,12 @@ class PyRofexToExcelApp:
         
         self._status_logger.update(status)
     
-    def run(self):
+    def run(self, force_reconfigure: bool = False):
         """Ejecutar el bucle principal de la aplicación."""
         try:
             logger.info("🚀 Iniciando aplicación de Datos de Mercado pyRofex-To-Excel")
             
-            if not self.initialize():
+            if not self.initialize(force_reconfigure=force_reconfigure):
                 print("\n" + "="*70)
                 print("\033[91m💥 FALLO DE INICIO DE APLICACIÓN\033[0m")
                 print("="*70)
@@ -763,6 +764,8 @@ class PyRofexToExcelApp:
                 print("   python -m pyRofex_To_Excel")
                 print("   # o")
                 print("   pyrofex-to-excel")
+                print("   # o para reingresar credenciales/configuración")
+                print("   pyrofex-to-excel --reconfigure")
                 print("="*70 + "\n")
                 
                 logger.error("🛑 Fallo de inicialización - deteniendo aplicación")
@@ -902,8 +905,18 @@ class PyRofexToExcelApp:
 
 def main():
     """Punto de entrada principal para la aplicación."""
+    parser = argparse.ArgumentParser(
+        description="pyRofex-To-Excel: streaming de datos de mercado a Excel"
+    )
+    parser.add_argument(
+        "--reconfigure",
+        action="store_true",
+        help="vuelve a pedir PYROFEX_USER/PYROFEX_PASSWORD/PYROFEX_ACCOUNT y URLs de pyRofex",
+    )
+    args = parser.parse_args()
+
     app = PyRofexToExcelApp()
-    app.run()
+    app.run(force_reconfigure=args.reconfigure)
 
 
 if __name__ == "__main__":
