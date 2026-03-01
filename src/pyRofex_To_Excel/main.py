@@ -107,6 +107,10 @@ class PyRofexToExcelApp:
             # Validar configuraciones
             if not self._validate_configurations():
                 return False
+
+            # Inicializar y validar conexión con Matriz ANTES de crear/abrir Excel
+            if not self._initialize_market_data_components():
+                return False
             
             # Inicializar componentes de Excel
             if not self._initialize_excel_components():
@@ -116,10 +120,6 @@ class PyRofexToExcelApp:
             if not self._load_symbols():
                 return False
 
-            # Inicializar componentes de datos de mercado (poblar cache de instrumentos)
-            if not self._initialize_market_data_components():
-                return False
-            
             # Validar y filtrar símbolos contra el cache de instrumentos
             if not self._validate_and_filter_symbols():
                 return False
@@ -390,6 +390,23 @@ class PyRofexToExcelApp:
                 print("="*70 + "\n")
                 
                 logger.error("🛑 Fallo al inicializar el cliente de la API de pyRofex - deteniendo aplicación")
+                return False
+
+            if not self.api_client.probe_matrix_connection():
+                print("\n" + "="*70)
+                print("\033[91m🛑 FALLO DE CONEXIÓN - La aplicación no puede continuar\033[0m")
+                print("="*70)
+                print("\033[91mNo se pudo establecer conectividad efectiva con Matriz\033[0m")
+                print("\n📋 Qué significa esto:")
+                print("   • La autenticación o conexión con Matriz/API no está operativa")
+                print("   • Para evitar inconsistencias, no se creará ni modificará el archivo Excel")
+                print("\n🔧 Próximos pasos:")
+                print("   1. Revisá conectividad de red/VPN y estado de Matriz")
+                print("   2. Verificá credenciales y entorno configurado")
+                print("   3. Reintentá ejecutar la aplicación")
+                print("="*70 + "\n")
+
+                logger.error("🛑 Fallo de conectividad con Matriz - deteniendo aplicación antes de inicializar Excel")
                 return False
             
             # CRITICAL: Pre-cargar instrumentos ANTES de inicializar WebSocketHandler

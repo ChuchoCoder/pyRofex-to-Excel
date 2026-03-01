@@ -72,6 +72,32 @@ class pyRofexClient:
                 logger.error(f"Fallo al inicializar pyRofex: {e}")
             
             return False
+
+    def probe_matrix_connection(self) -> bool:
+        """
+        Verificar conectividad efectiva con Matriz/pyRofex.
+
+        Realiza una llamada real a la API para confirmar que la sesión
+        autenticada puede alcanzar el backend remoto.
+
+        Returns:
+            bool: True si la conectividad está OK, False en caso contrario.
+        """
+        if not self.is_initialized:
+            logger.error("No se puede verificar conexión a Matriz: cliente no inicializado")
+            return False
+
+        try:
+            instruments_response = pyRofex.get_detailed_instruments()
+            if not instruments_response or 'instruments' not in instruments_response:
+                logger.error("Respuesta inválida al verificar conexión con Matriz")
+                return False
+
+            logger.info("Conectividad con Matriz verificada correctamente")
+            return True
+        except Exception as e:
+            logger.error(f"Fallo al verificar conectividad con Matriz: {e}")
+            return False
     
     def fetch_available_instruments(self, force_refresh: bool = False) -> Set[str]:
         """
