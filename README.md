@@ -13,23 +13,13 @@ Si solo querés usar la app (sin clonar el repo), este es el camino más simple.
    - Windows + Microsoft Excel instalado
    - Python 3.9 o superior
 
-2. Crear carpeta de trabajo y entorno virtual
+2. Instalar el paquete (rápido, sin `.venv`)
 
 ```bash
-mkdir pyrofex-app
-cd pyrofex-app
-python -m venv .venv
-.venv\Scripts\activate
-python -m pip install --upgrade pip
+python -m pip install --user pyrofex-to-excel
 ```
 
-3. Instalar el paquete (PyPI)
-
-```bash
-python -m pip install pyrofex-to-excel
-```
-
-4. Ejecutar la app
+3. Ejecutar la app
 
 ```bash
 pyrofex-to-excel
@@ -39,6 +29,17 @@ Alternativa equivalente:
 
 ```bash
 python -m pyRofex_To_Excel
+```
+
+Opcional (recomendado si querés aislamiento de dependencias): usar `.venv`
+
+```bash
+mkdir pyrofex-app
+cd pyrofex-app
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install pyrofex-to-excel
 ```
 
 Qué pasa automáticamente en ese primer arranque:
@@ -53,7 +54,7 @@ Si necesitás volver a ejecutar ese asistente (por ejemplo, usuario/clave incorr
 pyrofex-to-excel --reconfigure
 ```
 
-5. Verificar que está funcionando
+4. Verificar que está funcionando
 - Abrí el workbook generado.
 - Confirmá que existen las hojas `Tickers`, `MarketData`, `Trades` y `Formulas`.
 - En `MarketData` deberían empezar a actualizarse precios.
