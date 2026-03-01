@@ -158,6 +158,7 @@ jobs:
             await run({ github, context });
 
   publish-pypi:
+    name: Publish to PyPI (v${{ needs.build.outputs.release_version }})
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'workflow_dispatch' && inputs.repository == 'pypi'
