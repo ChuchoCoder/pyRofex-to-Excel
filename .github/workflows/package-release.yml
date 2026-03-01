@@ -137,7 +137,7 @@ jobs:
               raise SystemExit(0)
 
           wheel = pathlib.Path(wheels[0]).name
-          match = re.match(r"(?P<name>.+)-(?P<version>[^-]+)-", wheel)
+            match = re.match(r"^(?P<name>[^-]+)-(?P<version>[^-]+)-", wheel)
           if not match:
               print(f"Could not parse wheel filename: {wheel}")
               raise SystemExit(0)
@@ -156,10 +156,14 @@ jobs:
               env_file.write(f"TESTPYPI_INSTALL_CMD={install_cmd}\n")
 
           with open(summary, "a", encoding="utf-8") as f:
-              f.write("## TestPyPI package\\n")
-              f.write(f"- Package: `{package_name}`\\n")
-              f.write(f"- Version: `{version}`\\n")
-              f.write(f"- Install: `{install_cmd}`\\n")
+              f.write("## 📦 TestPyPI Package\n")
+              f.write(f"- **Package:** `{package_name}`\n")
+              f.write(f"- **Version:** `{version}`\n")
+              f.write("- **Status:** ⏳ Publishing...\n")
+              f.write("- **Install command:**\n")
+              f.write("```bash\n")
+              f.write(f"{install_cmd}\n")
+              f.write("```\n")
 
           print(f"Generated TestPyPI install command: {install_cmd}")
           PY
@@ -171,6 +175,24 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist
           skip-existing: true
+
+      - name: Add TestPyPI package link to summary
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          TESTPYPI_PACKAGE: ${{ env.TESTPYPI_PACKAGE }}
+          TESTPYPI_VERSION: ${{ env.TESTPYPI_VERSION }}
+        run: |
+          if [ -z "${TESTPYPI_PACKAGE}" ] || [ -z "${TESTPYPI_VERSION}" ]; then
+            echo "Skipping TestPyPI link summary: missing package metadata"
+            exit 0
+          fi
+
+          PACKAGE_URL="https://test.pypi.org/project/${TESTPYPI_PACKAGE}/${TESTPYPI_VERSION}/"
+          {
+            echo "- **Status:** ✅ Published"
+            echo "- **Project URL:** [Open package page](${PACKAGE_URL})"
+          } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Comment PR with TestPyPI install command
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
@@ -235,7 +257,61 @@ jobs:
           name: dist
           path: dist
 
+      - name: Extract PyPI package metadata
+        shell: bash
+        run: |
+          python - <<'PY'
+          import glob
+          import os
+          import pathlib
+          import re
+
+          wheels = sorted(glob.glob("dist/*.whl"))
+          if not wheels:
+              print("No wheel found in dist/; skipping metadata extraction")
+              raise SystemExit(0)
+
+          wheel = pathlib.Path(wheels[0]).name
+            match = re.match(r"^(?P<name>[^-]+)-(?P<version>[^-]+)-", wheel)
+          if not match:
+              print(f"Could not parse wheel filename: {wheel}")
+              raise SystemExit(0)
+
+          package_name = match.group("name").replace("_", "-")
+          version = match.group("version")
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+              env_file.write(f"PYPI_PACKAGE={package_name}\n")
+              env_file.write(f"PYPI_VERSION={version}\n")
+
+          print(f"Detected PyPI package: {package_name}=={version}")
+          PY
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist
+
+      - name: Add PyPI package link to summary
+        shell: bash
+        env:
+          PYPI_PACKAGE: ${{ env.PYPI_PACKAGE }}
+          PYPI_VERSION: ${{ env.PYPI_VERSION }}
+        run: |
+          if [ -z "${PYPI_PACKAGE}" ] || [ -z "${PYPI_VERSION}" ]; then
+            echo "Skipping PyPI link summary: missing package metadata"
+            exit 0
+          fi
+
+          PACKAGE_URL="https://pypi.org/project/${PYPI_PACKAGE}/${PYPI_VERSION}/"
+          {
+            echo "## 🚀 PyPI Package"
+            echo "- **Package:** ${PYPI_PACKAGE}"
+            echo "- **Version:** ${PYPI_VERSION}"
+            echo "- **Status:** ✅ Published"
+            echo "- **Project URL:** [Open package page](${PACKAGE_URL})"
+            echo "- **Install command:**"
+            echo '```bash'
+            echo "pip install ${PYPI_PACKAGE}==${PYPI_VERSION}"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
