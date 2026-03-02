@@ -63,7 +63,7 @@ switch ($Command) {
     }
     
     "install-dev" { 
-        Invoke-Command-Safe "python -m pip install -e \".[dev]\" --force-reinstall" "Installing package + dev extras"
+        Invoke-Command-Safe 'python -m pip install -e ".[dev]" --force-reinstall' "Installing package + dev extras"
     }
     
     "check" { 
@@ -73,7 +73,7 @@ switch ($Command) {
     "upgrade" { 
         $pipUpgrade = Invoke-Command-Safe "python -m pip install --upgrade pip setuptools wheel" "Upgrading packaging toolchain"
         if ($pipUpgrade) {
-            Invoke-Command-Safe "python -m pip install -e \".[dev]\" --upgrade --force-reinstall" "Upgrading project dependencies via pyproject"
+            Invoke-Command-Safe 'python -m pip install -e ".[dev]" --upgrade --force-reinstall' "Upgrading project dependencies via pyproject"
         }
     }
     
@@ -135,7 +135,7 @@ switch ($Command) {
     
     "dev-setup" {
         Write-Host "🔧 Setting up development environment..." -ForegroundColor Blue
-        $installResult = Invoke-Command-Safe "python -m pip install -e \".[dev]\" --force-reinstall" "Installing package + dev extras"
+        $installResult = Invoke-Command-Safe 'python -m pip install -e ".[dev]" --force-reinstall' "Installing package + dev extras"
         $devDeps = $installResult
         
         if ($installResult -and $devDeps) {

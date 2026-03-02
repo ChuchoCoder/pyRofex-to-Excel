@@ -199,3 +199,110 @@ Solo falta ejecutar el flujo de build + publicación (ver guía en [docs/PUBLICA
 - Rotá credenciales periódicamente.
 - Revisá permisos de archivos sensibles en tu entorno local.
 
+## 💻 Correr aplicación
+
+```powershell
+
+>.\setup.ps1 run
+
+🚀 Running pyRofex-to-Excel...
+🔄 Running application
+   Running: python -m pyRofex_To_Excel
+2026-03-02 09:28:55,787 - pyRofex_To_Excel.main - INFO - Versión de pyRofex-to-Excel: 1.1.5
+2026-03-02 09:28:55,787 - pyRofex_To_Excel.main - INFO - Validando configuraciones...
+0m)
+2026-03-02 09:28:55,788 - pyRofex_To_Excel.market_data.instrument_cache - INFO - Usando caché multi-nivel: Memoria → Archivo → API
+2026-03-02 09:28:55,788 - pyRofex_To_Excel.market_data.api_client - INFO - Inicializando sesión pyRofex (timeout de conexión: 20.0s)
+2026-03-02 09:28:57,189 - pyRofex_To_Excel.market_data.api_client - INFO - pyRofex inicializado con entorno: LIVE
+2026-03-02 09:28:57,189 - pyRofex_To_Excel.market_data.api_client - INFO - Autenticación con Matriz verificada correctamente (sin probe REST adicional)
+2026-03-02 09:28:57,189 - pyRofex_To_Excel.main - INFO - Pre-cargando instrumentos disponibles desde pyRofex...
+2026-03-02 09:28:57,244 - pyRofex_To_Excel.market_data.instrument_cache - INFO - ✗ Caché en archivo expirado (edad: 2451.8m > TTL: 30m)
+2026-03-02 09:28:57,249 - pyRofex_To_Excel.market_data.api_client - INFO - Obteniendo instrumentos disponibles desde la API de pyRofex...
+2026-03-02 09:29:04,479 - pyRofex_To_Excel.market_data.instrument_cache - INFO - ✓ Guardados 7227 instrumentos en caché (MEMORIA + ARCHIVO)
+2026-03-02 09:29:04,481 - pyRofex_To_Excel.market_data.api_client - INFO - Obtenidos 7227 instrumentos desde la API
+2026-03-02 09:29:04,482 - pyRofex_To_Excel.main - INFO - ✅ Pre-cargados 7227 instrumentos al caché
+2026-03-02 09:29:04,482 - pyRofex_To_Excel.main - INFO - 📊 Caché de instrumentos: 7227 instrumentos, 1025 opciones
+2026-03-02 09:29:04,482 - pyRofex_To_Excel.market_data.api_client - INFO - Manejador de datos de mercado registrado
+2026-03-02 09:29:04,482 - pyRofex_To_Excel.market_data.api_client - INFO - Manejador de errores registrado
+2026-03-02 09:29:04,482 - pyRofex_To_Excel.market_data.api_client - INFO - Manejador de excepciones configurado
+2026-03-02 09:29:04,482 - pyRofex_To_Excel.main - INFO - ✅ Componentes de datos de mercado inicializados
+2026-03-02 09:29:04,482 - pyRofex_To_Excel.main - INFO - Inicializando componentes de Excel...
+2026-03-02 09:29:04,482 - pyRofex_To_Excel.excel.workbook_manager - INFO - Archivo de Excel no encontrado. Creando uno nuevo: pyRofex-Market-Data.xlsx
+2026-03-02 09:29:08,131 - pyRofex_To_Excel.excel.workbook_manager - INFO - Conectado al libro de Excel: pyRofex-Market-Data.xlsx
+2026-03-02 09:29:08,237 - pyRofex_To_Excel.excel.workbook_manager - INFO - Hoja creada automáticamente: MarketData
+2026-03-02 09:29:08,258 - pyRofex_To_Excel.excel.workbook_manager - INFO - Hoja creada automáticamente: Tickers
+2026-03-02 09:29:09,223 - pyRofex_To_Excel.excel.workbook_manager - INFO - Hoja Formulas creada con fórmulas de referencia a MarketData
+2026-03-02 09:29:09,712 - pyRofex_To_Excel.excel.workbook_manager - INFO - Hoja Tickers poblada automáticamente desde cache de instrumentos
+2026-03-02 09:29:09,744 - pyRofex_To_Excel.excel.workbook_manager - INFO - Estructura mínima de hojas verificada/creada correctamente
+2026-03-02 09:29:09,749 - pyRofex_To_Excel.main - INFO - ✅ Componentes de Excel inicializados
+2026-03-02 09:29:09,749 - pyRofex_To_Excel.main - INFO - Cargando símbolos desde Excel...
+2026-03-02 09:29:09,749 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargando todos los símbolos desde Excel
+2026-03-02 09:29:09,776 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargados 345 símbolos de opciones
+2026-03-02 09:29:09,800 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargados 30 símbolos de acciones
+2026-03-02 09:29:09,828 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargados 90 símbolos de bonos
+2026-03-02 09:29:09,870 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargados 20 símbolos de CEDEARs
+2026-03-02 09:29:09,894 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargados 20 símbolos de letras
+2026-03-02 09:29:09,915 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargados 20 símbolos de ONs
+2026-03-02 09:29:09,944 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargados 12 símbolos de Panel General
+2026-03-02 09:29:09,981 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargados 24 símbolos de Futuros
+2026-03-02 09:29:09,982 - pyRofex_To_Excel.excel.symbol_loader - INFO - Creados 32 símbolos de cauciones
+2026-03-02 09:29:09,982 - pyRofex_To_Excel.excel.symbol_loader - INFO - Cargado un total de 593 símbolos en todos los tipos de instrumentos
+2026-03-02 09:29:09,983 - pyRofex_To_Excel.main - INFO - Cargados 24 símbolos de futuros desde Excel
+2026-03-02 09:29:09,983 - pyRofex_To_Excel.main - INFO - Resumen de carga de símbolos:
+2026-03-02 09:29:09,983 - pyRofex_To_Excel.main - INFO -   - options: 345 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO -   - acciones: 30 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO -   - bonos: 90 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO -   - cedears: 20 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO -   - letras: 20 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO -   - ons: 20 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO -   - panel_general: 12 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO -   - futuros: 24 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO -   - cauciones: 32 símbolos
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO - ✅ Total de símbolos cargados: 561
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.main - INFO - Validando símbolos contra instrumentos disponibles en pyRofex...
+2026-03-02 09:29:09,984 - pyRofex_To_Excel.market_data.api_client - INFO - Validación de símbolos: 345 válidos, 0 inválidos de 345 totales
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.market_data.api_client - INFO - Validación de símbolos: 216 válidos, 0 inválidos de 216 totales
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - INFO - Valores: 216/216 válidos
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - INFO -   - Futuros: 24/24 válidos
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.market_data.api_client - WARNING - Se encontraron 11 símbolos inválidos: ['MERV - XMEV - PESOS - 5D', 'MERV - XMEV - PESOS - 6D', 'MERV - XMEV - PESOS - 12D', 'MERV - XMEV - PESOS - 13D', 'MERV - XMEV - PESOS - 19D']...
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.market_data.api_client - INFO - Validación de símbolos: 21 válidos, 11 inválidos de 32 totales
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING - 11 cauciones inválidas encontradas en Excel:
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 5D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 6D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 12D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 13D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 19D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 20D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 22D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 26D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 27D
+2026-03-02 09:29:09,985 - pyRofex_To_Excel.main - WARNING -     - MERV - XMEV - PESOS - 31D
+2026-03-02 09:29:09,986 - pyRofex_To_Excel.main - WARNING -     ... y 1 más
+2026-03-02 09:29:09,986 - pyRofex_To_Excel.main - INFO - Cauciones: 21/32 válidas
+2026-03-02 09:29:09,987 - pyRofex_To_Excel.main - WARNING - Total: 11 símbolos inválidos removidos del Excel
+2026-03-02 09:29:09,987 - pyRofex_To_Excel.main - INFO - ✅ 582 símbolos válidos listos para suscripción
+2026-03-02 09:29:09,987 - pyRofex_To_Excel.main - INFO - Trades sync está habilitado, inicializando componentes...
+2026-03-02 09:29:09,987 - pyRofex_To_Excel.main - INFO - Inicializando componentes de Trades...
+2026-03-02 09:29:10,107 - pyRofex_To_Excel.main - INFO - 🔄 Sincronizando órdenes ejecutadas existentes desde la API...
+2026-03-02 09:29:10,460 - pyRofex_To_Excel.main - INFO - ⏱️  Real-time trades updates DISABLED - using periodic sync every 20s
+2026-03-02 09:29:10,460 - pyRofex_To_Excel.main - INFO - ✅ Componentes de Trades inicializados correctamente
+2026-03-02 09:29:10,460 - pyRofex_To_Excel.main - INFO - ✅ Inicialización de la aplicación completada exitosamente
+2026-03-02 09:29:10,461 - pyRofex_To_Excel.main - INFO - Iniciando suscripción a datos de mercado...
+2026-03-02 09:29:11,795 - websocket - INFO - Websocket connected
+2026-03-02 09:29:12,463 - pyRofex_To_Excel.market_data.api_client - INFO - Suscripto a datos de mercado para 345 símbolos
+2026-03-02 09:29:12,463 - pyRofex_To_Excel.main - INFO - ✅ Suscripto a 345 opciones
+2026-03-02 09:29:12,464 - pyRofex_To_Excel.market_data.api_client - INFO - Suscripto a datos de mercado para 216 símbolos
+2026-03-02 09:29:12,464 - pyRofex_To_Excel.main - INFO - ✅ Suscripto a 216 valores
+2026-03-02 09:29:12,464 - pyRofex_To_Excel.main - INFO -   - Incluye 24 futuros
+2026-03-02 09:29:12,464 - pyRofex_To_Excel.market_data.api_client - INFO - Suscripto a datos de mercado para 21 símbolos
+2026-03-02 09:29:12,464 - pyRofex_To_Excel.main - INFO - ✅ Suscripto a 21 cauciones
+2026-03-02 09:29:12,464 - connection - INFO - [2026-03-02 09:29:12] Suscripción a Datos de Mercado: Iniciado exitosamente
+2026-03-02 09:29:12,464 - pyRofex_To_Excel.main - INFO - ✅ Aplicación ejecutándose - streaming de datos de mercado iniciado      
+2026-03-02 09:29:12,464 - pyRofex_To_Excel.main - INFO - Esperando que los datos de mercado iniciales se pueblen...
+2026-03-02 09:29:14,465 - pyRofex_To_Excel.main - INFO - ✅ Iniciando bucle principal - todos los logs se mostrarán en UNA línea actualizable
+2026-03-02 09:29:14,466 - pyRofex_To_Excel.main - INFO - 📊 Primera actualización de Excel - inicializando
+2026-03-02 09:29:14,569 - pyRofex_To_Excel.excel.sheet_operations - INFO - 📋 Caché de filas construido: 0 símbolos desde Excel
+2026-03-02 09:29:14,569 - pyRofex_To_Excel.excel.sheet_operations - INFO - ➕ Auto-poblando 561 símbolos nuevos en la hoja Prices...
+[09:29:37] 📊 Ciclo 8 | 📡 WS: 582/582 msgs (0 err) | 📈 Excel: 1 acts. | 📝 0 orders
+
+```
