@@ -4,6 +4,12 @@ run-name: >-
   ${{ github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, github.head_ref) || github.ref_name }}
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "pyproject.toml"
   workflow_dispatch:
     inputs:
       repository:
@@ -82,7 +88,7 @@ jobs:
           echo "release_commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Generate TestPyPI dev version
-        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.repository == 'testpypi')
+        if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.repository == 'testpypi')
         run: python tools/ci/generate_testpypi_dev_version.py
 
       - name: Build package
@@ -100,7 +106,7 @@ jobs:
   publish-testpypi:
     runs-on: ubuntu-latest
     needs: build
-    if: (github.event_name == 'workflow_dispatch' && inputs.repository == 'testpypi') || github.event_name == 'pull_request'
+    if: (github.event_name == 'workflow_dispatch' && inputs.repository == 'testpypi') || github.event_name == 'pull_request' || github.event_name == 'push'
     environment: testpypi
     permissions:
       id-token: write
