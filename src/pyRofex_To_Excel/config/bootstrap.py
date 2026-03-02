@@ -82,18 +82,37 @@ def _prompt_password_with_mask(prompt_text: str) -> str:
         sys.stdout.flush()
 
 
-def _prompt_value(key: str, current: str, default: str = "", secret: bool = False) -> str:
+def _broker_from_url(url: str) -> str:
+    """Extract broker name from URL like https://api.cocos.xoms.com.ar/"""
+    try:
+        host = url.split("//", 1)[1].split("/")[0]  # api.cocos.xoms.com.ar
+        parts = host.split(".")
+        if len(parts) >= 5 and parts[0] == "api" and parts[2] == "xoms":
+            return parts[1]
+    except Exception:
+        pass
+    return ""
+
+
+def _urls_from_broker(broker: str) -> tuple:
+    """Build API and WS URLs from broker name."""
+    b = broker.strip().lower()
+    return f"https://api.{b}.xoms.com.ar/", f"wss://api.{b}.xoms.com.ar/"
+
+
+def _prompt_value(key: str, current: str, default: str = "", secret: bool = False, label: str = "") -> str:
+    display = label or key
     suggested = current if current and current not in _PLACEHOLDER_VALUES else default
 
     while True:
         if secret:
-            prompt_text = f"{key}{' (enter para mantener valor actual)' if current and current not in _PLACEHOLDER_VALUES else ''}: "
+            prompt_text = f"{display}{' (enter para mantener)' if current and current not in _PLACEHOLDER_VALUES else ''}: "
             entered = _prompt_password_with_mask(prompt_text)
         else:
             if suggested:
-                entered = input(f"{key} [{suggested}]: ").strip()
+                entered = input(f"{display} [{suggested}]: ").strip()
             else:
-                entered = input(f"{key}: ").strip()
+                entered = input(f"{display}: ").strip()
 
         if entered:
             return entered
@@ -145,36 +164,49 @@ def _prompt_required_pyrofex_values(current_values: Dict[str, str]) -> Dict[str,
     values["PYROFEX_USER"] = _prompt_value(
         "PYROFEX_USER",
         current=current_values["PYROFEX_USER"],
+        label="Usuario (Matriz)",
     )
     values["PYROFEX_PASSWORD"] = _prompt_value(
         "PYROFEX_PASSWORD",
         current=current_values["PYROFEX_PASSWORD"],
         secret=True,
+        label="Contraseña (Matriz)",
     )
     values["PYROFEX_ACCOUNT"] = _prompt_value(
         "PYROFEX_ACCOUNT",
         current=current_values["PYROFEX_ACCOUNT"],
+        label="Nº Cuenta (Matriz)",
     )
 
-    values["PYROFEX_ENVIRONMENT"] = _prompt_value(
-        "PYROFEX_ENVIRONMENT",
-        current=current_values["PYROFEX_ENVIRONMENT"],
-        default="LIVE",
-    ).upper()
+    # PYROFEX_ENVIRONMENT is always LIVE — no prompt needed
+    values["PYROFEX_ENVIRONMENT"] = "LIVE"
 
-    values["PYROFEX_API_URL"] = _prompt_value(
-        "PYROFEX_API_URL",
-        current=current_values["PYROFEX_API_URL"],
-        default="https://api.cocos.xoms.com.ar/",
+    default_broker = _broker_from_url(current_values.get("PYROFEX_API_URL", "")) or "cocos"
+    broker = _prompt_value(
+        "BROKER",
+        current="",
+        default=default_broker,
+        label='Broker (ejemplo: ingresá "cocos" si usás api.cocos.xoms.com.ar)',
     )
-
-    values["PYROFEX_WS_URL"] = _prompt_value(
-        "PYROFEX_WS_URL",
-        current=current_values["PYROFEX_WS_URL"],
-        default="wss://api.cocos.xoms.com.ar/",
-    )
+    values["PYROFEX_API_URL"], values["PYROFEX_WS_URL"] = _urls_from_broker(broker)
 
     return values
+
+
+def _prompt_excel_filename() -> Dict[str, str]:
+    """Ask the user for the Excel workbook name and normalize to .xlsx."""
+    current_file = os.getenv("EXCEL_FILE", excel_config.EXCEL_FILE)
+    default_stem = Path(current_file).stem  # strip any extension
+
+    raw = _prompt_value(
+        "EXCEL_FILE",
+        current="",
+        default=default_stem,
+        label="Nombre del archivo Excel (sin extensión)",
+    )
+    stem = Path(raw).stem  # strip extension if user typed one
+    xlsx_name = f"{stem}.xlsx"
+    return {"EXCEL_FILE": xlsx_name}
 
 
 def _ensure_xlsx_when_workbook_missing() -> Dict[str, str]:
@@ -266,8 +298,12 @@ def run_first_time_bootstrap(force_reconfigure: bool = False) -> bool:
         prompted_values = _prompt_required_pyrofex_values(current)
         accumulated_updates.update(prompted_values)
 
-    excel_updates = _ensure_xlsx_when_workbook_missing()
-    accumulated_updates.update(excel_updates)
+        excel_name_updates = _prompt_excel_filename()
+        accumulated_updates.update(excel_name_updates)
+
+    if "EXCEL_FILE" not in accumulated_updates:
+        excel_updates = _ensure_xlsx_when_workbook_missing()
+        accumulated_updates.update(excel_updates)
 
     if accumulated_updates:
         _update_env(accumulated_updates)
