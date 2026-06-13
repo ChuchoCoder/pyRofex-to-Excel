@@ -219,19 +219,25 @@ class SheetOperations:
                         has_suffix = any(full_symbol.endswith(suffix) for suffix in 
                                        [" - 24hs", " - 48hs", " - 72hs", " - CI", " - T0", " - T1", " - T2"])
                         
-                        # If no suffix present and not a caucion (PESOS - XD), add " - 24hs"
-                        # This handles options that had their suffix stripped for display
+                        # If no suffix present and not a caucion (PESOS - XD), add suffix
+                        # This handles options that had their suffix stripped for display.
+                        # Options now use CI settlement (settlType: 1, suffix " - CI")
+                        # instead of 24hs (settlType: 2, suffix " - 24hs").
                         if not has_suffix and "PESOS" not in full_symbol:
-                            # OPTIMIZATION: Check if symbol (with suffix) exists in options set
-                            # The options_symbols_set contains full symbols WITH suffix, so we need to check
-                            # if adding the suffix would match an option
-                            full_symbol_with_suffix = f"{full_symbol} - 24hs"
-                            is_option = full_symbol_with_suffix in options_symbols_set
+                            # OPTIMIZATION: Check which suffix matches in the options set
+                            # The options_symbols_set contains full symbols WITH suffix
+                            full_symbol_with_suffix_ci = f"{full_symbol} - CI"
+                            full_symbol_with_suffix_24hs = f"{full_symbol} - 24hs"
+                            is_option_ci = full_symbol_with_suffix_ci in options_symbols_set
+                            is_option_24hs = full_symbol_with_suffix_24hs in options_symbols_set
                             
-                            # Add suffix for all MERV securities (stocks, bonds, options, etc.)
-                            # This maintains consistency with market data updates
-                            if is_option or not any(x in full_symbol for x in ['/', 'I.']):
-                                full_symbol = full_symbol_with_suffix
+                            # Prefer - CI for options; fall back to - 24hs for securities
+                            if is_option_ci:
+                                full_symbol = full_symbol_with_suffix_ci
+                            elif is_option_24hs:
+                                full_symbol = full_symbol_with_suffix_24hs
+                            elif not any(x in full_symbol for x in ['/', 'I.']):
+                                full_symbol = full_symbol_with_suffix_24hs
                         
                         # Check for duplicates
                         if full_symbol in self._symbol_row_cache:
@@ -1022,15 +1028,22 @@ class SheetOperations:
                     full_symbol = restore_symbol_prefix(display_symbol)
                     
                     # Add suffix if needed (same logic as cache building)
+                    # Options now use CI settlement (settlType: 1, suffix " - CI")
                     has_suffix = any(full_symbol.endswith(suffix) for suffix in 
                                    [" - 24hs", " - 48hs", " - 72hs", " - CI", " - T0", " - T1", " - T2"])
                     
                     if not has_suffix and "PESOS" not in full_symbol:
-                        full_symbol_with_suffix = f"{full_symbol} - 24hs"
-                        is_option = full_symbol_with_suffix in options_symbols_set
+                        full_symbol_with_suffix_ci = f"{full_symbol} - CI"
+                        full_symbol_with_suffix_24hs = f"{full_symbol} - 24hs"
+                        is_option_ci = full_symbol_with_suffix_ci in options_symbols_set
+                        is_option_24hs = full_symbol_with_suffix_24hs in options_symbols_set
                         
-                        if is_option or not any(x in full_symbol for x in ['/', 'I.']):
-                            full_symbol = full_symbol_with_suffix
+                        if is_option_ci:
+                            full_symbol = full_symbol_with_suffix_ci
+                        elif is_option_24hs:
+                            full_symbol = full_symbol_with_suffix_24hs
+                        elif not any(x in full_symbol for x in ['/', 'I.']):
+                            full_symbol = full_symbol_with_suffix_24hs
                     
                     # Check if duplicate
                     if full_symbol in seen_symbols:

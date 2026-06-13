@@ -21,12 +21,15 @@ def run_symbol_display_checks() -> bool:
     test_cases = [
         # (symbol, is_option, expected_result, description)
         ("MERV - XMEV - GGAL - 24hs", False, "GGAL - 24hs", "Regular stock keeps suffix"),
-        ("MERV - XMEV - GFGV38566O - 24hs", True, "GFGV38566O", "Option removes suffix"),
+        ("MERV - XMEV - GFGV38566O - 24hs", True, "GFGV38566O", "Option removes - 24hs suffix"),
+        ("MERV - XMEV - GFGV38566O - CI", True, "GFGV38566O", "Option removes - CI suffix"),
+        ("MERV - XMEV - GFGC7000AG - CI", True, "GFGC7000AG", "Option removes - CI suffix"),
         ("MERV - XMEV - GFGV88566O - 24hs", True, "GFGV88566O", "Option removes suffix"),
         ("MERV - XMEV - PESOS - 3D", False, "PESOS - 3D", "Caucion keeps suffix"),
         ("MERV - XMEV - COME - 24hs", False, "COME - 24hs", "Stock keeps suffix"),
         ("MERV - XMEV - YPFD - 48hs", False, "YPFD - 48hs", "Stock with 48hs keeps suffix"),
         ("MERV - XMEV - GFGC47566O - 24hs", True, "GFGC47566O", "Option removes suffix"),
+        ("MERV - XMEV - GFGC47566O - CI", True, "GFGC47566O", "Option removes - CI suffix"),
         ("GGAL - 24hs", False, "GGAL - 24hs", "Already clean symbol unchanged"),
         ("GFGV38566O", True, "GFGV38566O", "Already clean option unchanged"),
     ]

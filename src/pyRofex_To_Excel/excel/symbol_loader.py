@@ -88,7 +88,8 @@ class SymbolLoader:
                 return pd.DataFrame()
             
             # Transformar símbolos para compatibilidad con pyRofex
-            transformed_options = [transform_symbol_for_pyrofex(opt) for opt in valid_options]
+            # Options now use CI settlement (settlType: 1) instead of 24hs (settlType: 2)
+            transformed_options = [transform_symbol_for_pyrofex(opt, default_suffix=" - CI") for opt in valid_options]
             
             # Crear DataFrame con columnas necesarias para opciones
             # IMPORTANTE: Incluir TODAS las columnas que el WebSocket handler actualiza

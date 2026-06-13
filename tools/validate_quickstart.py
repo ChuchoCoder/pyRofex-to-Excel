@@ -143,7 +143,7 @@ for user, password, account in test_credentials:
 
 # Step 5: Symbol Transformation Test
 print("\n🔍 Step 5: Symbol Transformation Test")
-def transform_symbol_for_pyrofex(symbol):
+def transform_symbol_for_pyrofex(symbol, default_suffix=" - 24hs"):
     """Test implementation of symbol transformation with MERV prefix logic"""
     import re
 
@@ -197,7 +197,7 @@ def transform_symbol_for_pyrofex(symbol):
         
         # Add default suffix if needed
         if not has_suffix and not is_caucion and not is_option and not is_index and not is_future:
-            symbol = f"{symbol} - 24hs"
+            symbol = f"{symbol}{default_suffix}"
         
         return "MERV - XMEV - " + symbol
     else:
